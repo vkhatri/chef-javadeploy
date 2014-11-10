@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: gitdeploy
-# Resource:: provider
+# Cookbook Name:: javadeploy
+# Resource:: default
 #
 # Copyright 2014, Virender Khatri
 #

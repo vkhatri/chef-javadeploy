@@ -136,7 +136,7 @@ def repository
     owner new_resource.user
     group new_resource.group
     mode new_resource.dir_mode
-    only_if { setup_resource and new_resource.console_log }
+    only_if { setup_resource && new_resource.console_log }
     action resource_action
   end
 

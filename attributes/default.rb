@@ -17,7 +17,7 @@ default['javadeploy']['group'] = 'jdeploy'
 default['javadeploy']['dir_mode'] = '0755'
 
 # capture process logs, default goes to /dev/null
-default['javadeploy']['console_log'] = false
+default['javadeploy']['console_log'] = true
 
 # notify repo service on resource/revision/etc. change
 default['javadeploy']['notify_restart'] = true
@@ -47,3 +47,7 @@ default['javadeploy']['java_options'] = []
 default['javadeploy']['current_revision'] = 'master'
 
 default['javadeploy']['env_path'] = nil
+
+default['javadeploy']['limits']['memlock'] = 'unlimited'
+default['javadeploy']['limits']['nofile'] = '48000'
+default['javadeploy']['limits']['nproc'] = 'unlimited'
