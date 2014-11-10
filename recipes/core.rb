@@ -29,19 +29,21 @@
   end
 end
 
-# javadeploy service user limits
-user_ulimit node['javadeploy']['user'] do
-  filehandle_limit node['javadeploy']['limits']['nofile']
-  process_limit node['']['limits']['nproc']
-  memory_limit node['javadeploy']['limits']['memlock']
-end
-
-pam_limits = 'session    required   pam_limits.so'
-ruby_block 'require_pam_limits.so' do
-  block do
-    fe = Chef::Util::FileEdit.new('/etc/pam.d/su')
-    fe.search_file_replace_line(/# #{pam_limits}/, pam_limits)
-    fe.write_file
+if node['javadeploy']['setup_ulimit']
+  # javadeploy service user limits
+  user_ulimit node['javadeploy']['user'] do
+    filehandle_limit node['javadeploy']['limits']['nofile']
+    process_limit node['javadeploy']['limits']['nproc']
+    memory_limit node['javadeploy']['limits']['memlock']
   end
-  only_if { ::File.readlines('/etc/pam.d/su').grep(/# #{pam_limits}/).any? }
+
+  pam_limits = 'session    required   pam_limits.so'
+  ruby_block 'require_pam_limits.so' do
+    block do
+      fe = Chef::Util::FileEdit.new('/etc/pam.d/su')
+      fe.search_file_replace_line(/# #{pam_limits}/, pam_limits)
+      fe.write_file
+    end
+    only_if { ::File.readlines('/etc/pam.d/su').grep(/# #{pam_limits}/).any? }
+  end
 end

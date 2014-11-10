@@ -47,6 +47,9 @@ default['javadeploy']['java_options'] = []
 default['javadeploy']['current_revision'] = 'master'
 
 default['javadeploy']['env_path'] = nil
+default['javadeploy']['init_style'] = 'init'
+
+default['javadeploy']['setup_ulimit'] = true
 
 default['javadeploy']['limits']['memlock'] = 'unlimited'
 default['javadeploy']['limits']['nofile'] = '48000'

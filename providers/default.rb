@@ -159,7 +159,7 @@ def repository
               :args => new_resource.args.join(' ')
              )
     notifies :restart, "service[#{service_name}]", :delayed if new_resource.notify_restart
-    only_if { new_resource.manage_service }
+    only_if { new_resource.manage_service && new_resource.init_style == 'init' }
     action resource_action
   end
 
@@ -170,6 +170,12 @@ def repository
   end
 
   service service_name do
+    case node['javadeploy']['init_style']
+    when 'upstart'
+      provider Chef::Provider::Service::Upstart
+    else
+      provider Chef::Provider::Service::Init
+    end
     supports new_resource.service_supports
     action new_resource.service_action
   end

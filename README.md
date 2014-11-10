@@ -89,6 +89,8 @@ Parameters:
 
 * `default[:javadeploy][:revision_override][:environment]` (default: `true`): repositories revision override for an `environment`
 
+* `default[:javadeploy][:init_style]` (default: `init`): init style for javadeploy repository service
+
 * <del> `default[:javadeploy][:databag]` (default: `javadeploy`): databag source for repositories, not yet supported </del>
 
 
@@ -126,7 +128,8 @@ Parameters:
 * add databag source
 * add revision override feature
 * add ssh key wrapper cookbook for key/wrapper management from a databag
-
+* add/test debian init script
+* add more init style
 
 ## Contributing
 
