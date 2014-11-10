@@ -1,0 +1,250 @@
+#!/bin/bash
+
+# This file is managed by Chef.
+# Note: DO NOT MODIFY this file locally, it will be overwritten by Chef.
+#
+# <%=@service_name%> daemon
+# chkconfig: 345 20 80
+# description: <%=@service_name%> daemon
+# processname: <%=@service_name%>
+#
+#
+### Service Information
+# Provides:          <%=@service_name%> Service
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 6
+# Description:       Manages <%=@service_name%> Service
+
+# Set PATH if necessary
+# PATH=/usr/bin:/sbin:/bin:/usr/sbin:/mnt/scripts
+# export PATH
+
+# Source System Function library
+<% case node.platform_family %>
+<% when 'debian' %>
+. /lib/lsb/init-functions
+<% when 'rhel' %>
+. /etc/init.d/functions
+<% end %>
+
+JAVA_BINARY=`which java`
+test -x $JAVA_BINARY || {
+  echo -n "missing java" ;
+  exit 1
+}
+
+STARTUP_WAIT_TIME=<%=@startup_wait_time%>
+
+# service user
+SERVICE_USER=<%=@user%>
+
+# service group
+SERVICE_GROUP=<%=@gitdeploy_group%>
+
+# service name
+NAME=<%=@service_name%>
+
+# stale symlinks
+SERVICE_HOME=<%=@home%>
+test -d $SERVICE_BASE || {
+  echo -n "$SERVICE_HOME does not exists or has stale symlink" ;
+  exit 1 ;
+}
+
+# log file
+LOG_FILE=" 1>> <%= @log_file -%> 2>&1 "
+
+# Servic PID File
+PID_FILE=<%=@pid_file%>
+
+# service options
+OPTIONS="<%= @options -%>"
+
+# jar file
+<%= if @jar -%>
+JAR_FILE="-jar <%= @jar -%>"
+<% end -%>
+
+# service options
+ARGUMENTS="<%= @args -%>"
+
+# Service Exec Command and Options
+EXEC_COMMAND="$JAVA_BINARY $OPTIONS $JAR_FILE $ARGUMENTS"
+
+RETVAL=0
+
+# Common
+service_start_pre_check() {
+  if [ -s $PID_FILE ]; then
+    process_pid=$(cat $PID_FILE)
+    ps -p $process_pid > /dev/null
+    if [ $? == 0 ]; then
+      echo -n "Service is already running (pid $process_pid) .."
+      echo
+      exit 0
+    else
+      echo -n "Service is dead and pid file exists($PID_FILE) .."
+      echo
+      exit 1
+    fi
+  fi
+}
+
+service_stop_pre_check() {
+  if [ ! -f $PID_FILE ]; then
+    echo -n "Service is already Stopped"
+    echo
+    # exit 0
+  else
+    process_pid=$(cat $PID_FILE)
+    ps -p $process_pid > /dev/null
+    if [ $? != 0 ]; then
+      rm -fr $PID_FILE
+      echo -n "Service is dead and pid file exists($PID_FILE) .. pid file removed     [OK]"
+      echo
+      # exit 0
+    fi
+  fi
+}
+
+# RHEL Platform Family Service Management
+rhel_service_start() {
+    service_start_pre_check
+    echo "Starting $SERVICE_NAME .."
+    daemon --user $SERVICE_USER --pidfile $PID_FILE $SERVICE_EXEC_CMD $SERVICE_OPTIONS $SERVICE_LOG_FILE &
+    RETVAL=$?
+    sleep 3
+    if [ $RETVAL = 0 ]; then
+      success
+      # get PID
+      /bin/ps hww -u "$SERVICE_USER" -o sess,ppid,pid,comm,cmd | \
+        while read sess ppid pid comm cmd; do
+          # Check Service Name
+          service_exec=$(echo $comm| tr -d ' ')
+          if [ $service_exec == $SERVICE_EXEC ]; then
+            echo $cmd | grep "$SERVICE_IDENTIFIER" > /dev/null
+            if [ $? = 0 ]; then
+              # found PID
+              echo $pid > $PID_FILE
+              break
+            fi
+          fi
+        done
+      test -s $PID_FILE || echo -n "failed to update pid file"
+    else
+      failure
+    fi
+    echo
+}
+
+rhel_service_stop() {
+  service_stop_pre_check
+  echo -n "Shutting down $SERVICE_NAME .."
+  killproc -p $PID_FILE $SERVICE_NAME
+  RETVAL=$?
+  echo
+
+}
+
+rhel_service_status() {
+    status -p $PID_FILE $SERVICE_NAME
+    RETVAL=$?
+}
+
+# Debian Platform Family Service Management
+debian_service_start() {
+    service_start_pre_check
+    start-stop-daemon --start --background --make-pidfile --chuid $SERVICE_USER --user $SERVICE_USER --pidfile $PID_FILE --exec $SERVICE_EXEC_BINARY -- $SERVICE_EXEC_OPTIONS $SERVICE_OPTIONS $SERVICE_LOG_FILE
+    RETVAL=$?
+    if [ $RETVAL == 0 ]; then
+      log_success_msg "Starting $SERVICE_NAME ..                [OK]"
+    else
+      log_failure_msg "Starting $SERVICE_NAME ..                [FAILED]"
+    fi
+}
+
+debian_service_stop() {
+  service_stop_pre_check
+  #killproc -p $PID_FILE
+  start-stop-daemon --stop --exec $SERVICE_EXEC_BINARY --pidfile $PID_FILE
+  RETVAL=$?
+  if [ $RETVAL == 0 ]; then
+    rm -f $PID_FILE
+    log_success_msg "Shutting down $SERVICE_NAME ..             [OK]"
+  else
+    log_failure_msg "Shutting down $SERVICE_NAME ..             [FAILED]"
+  fi
+}
+
+debian_service_status() {
+  #status_of_proc -p $PID_FILE $SERVICE_EXEC_BINARY $SERVICE_NAME
+  #RETVAL=$?
+  if [ -s $PID_FILE ]; then
+    process_pid=$(cat $PID_FILE)
+    ps -p $process_pid > /dev/null
+    if [ $? == 0 ]; then
+      echo -n "Service is running($process_pid) .."
+      echo
+      RETVAL=0
+    else
+      echo -n "Service is dead and pid file exists($PID_FILE) .."
+      echo
+      RETVAL=1
+    fi
+  else
+    echo -n "Service is not running .."
+    echo
+    RETVAL=3
+  fi
+}
+
+# Process Service Action
+case "$PLATFORM_FAMILY" in
+  rhel)
+    case "$1" in
+      start)
+        rhel_service_start
+        ;;
+      stop)
+        rhel_service_stop
+        ;;
+      status)
+        rhel_service_status
+        ;;
+      restart)
+        rhel_service_stop
+        sleep 5
+        rhel_service_start
+        ;;
+      *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=1
+    esac
+    ;;
+  debian)
+    case "$1" in
+      start)
+        debian_service_start
+        ;;
+      stop)
+        debian_service_stop
+        ;;
+      status)
+        debian_service_status
+        ;;
+      restart)
+        debian_service_stop
+        sleep 5
+        debian_service_start
+        ;;
+      *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=1
+    esac
+    ;;
+  *)
+    echo "Unkown Platform Family, valid are 'debian rhel'"
+    RETVAL 1
+esac
+
+exit $RETVAL

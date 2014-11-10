@@ -1,0 +1,137 @@
+#!/bin/bash
+#
+# This file is managed by Chef.
+# Do NOT modify this file directly.
+#
+# chkconfig: 345 20 80
+# description: <%= @service_name -%> daemon
+# processname: <%= @service_name %>
+
+SERVICE_USER=<%= @user %>
+SERVICE_GROUP=<%= @group %>
+
+PROGRAM=<%= @service_name %>
+PID_FILE=<%= @pid_file %>
+
+LOG_FILE="1>> <%= @log_file -%> 2>&1"
+
+# stale symlinks
+SERVICE_HOME=<%= @home %>
+test -d $SERVICE_BASE || {
+  echo -n "$SERVICE_HOME does not exists or has stale symlink" ;
+  exit 1 ;
+}
+
+JAVA_BINARY=`which java`
+test -x $JAVA_BINARY || {
+  echo "missing java" ;
+  exit 1
+}
+
+WAIT_FOR_START=10
+
+# service options
+JAVA_OPTIONS="<%= @options -%>"
+
+# jar file
+<% if @jar -%>
+JAR_FILE="-jar <%= @jar -%>"
+<% end -%>
+
+# service options
+JAVA_ARGS="<%= @args -%>"
+
+# class path
+CLASS_PATH="<%= @class_path -%>"
+
+CLASS_NAME="<%= @class_name -%>"
+
+. /etc/init.d/functions
+
+SERVICE_EXEC="$JAVA_BINARY $CLASS_PATH $JAR_FILE $JAVA_OPTIONS $CLASS_NAME $JAVA_ARGS"
+
+RETVAL=0
+
+# Common
+service_start_pre_check() {
+  if [ -s $PID_FILE ]; then
+    process_pid=$(cat $PID_FILE)
+    ps -p $process_pid > /dev/null
+    if [ $? == 0 ]; then
+      echo -n "$PROGRAM is already running (pid $process_pid) .."
+      echo
+      exit 0
+    else
+      echo -n "$PROGRAM is dead and pid file exists ($PID_FILE) .."
+      echo
+      exit 1
+    fi
+  fi
+}
+
+service_stop_pre_check() {
+  if [ ! -f $PID_FILE ]; then
+    echo "$PROGRAM is already stopped "
+    # echo_success
+    exit 0
+  else
+    process_pid=$(cat $PID_FILE)
+    ps -p $process_pid > /dev/null
+    if [ $? != 0 ]; then
+      rm -fr $PID_FILE
+      echo "$PROGRAM is dead and pid file exists ($PID_FILE). pid file removed "
+      # echo_success
+      exit 0
+    fi
+  fi
+  echo
+}
+
+service_start() {
+    service_start_pre_check
+    echo -n "Starting $PROGRAM .."
+    daemon --user $SERVICE_USER $SERVICE_EXEC -p $PID_FILE $LOG_FILE
+    RETVAL=$?
+    if [ $RETVAL = 0 ]; then
+      echo_success
+    else
+      echo_failure
+    fi
+    echo
+    return $RETVAL
+}
+
+service_stop() {
+  service_stop_pre_check
+  echo -n "Shutting down $PROGRAM .. "
+  killproc -p $PID_FILE $PROGRAM
+  RETVAL=$?
+  echo_success
+}
+
+service_status() {
+    status -p $PID_FILE $PROGRAM
+    RETVAL=$?
+}
+
+case "$1" in
+  start)
+    service_start
+  ;;
+  stop)
+    service_stop
+  ;;
+  status)
+    service_status
+  ;;
+  restart)
+    service_stop
+    sleep $WAIT_FOR_START
+    service_start
+  ;;
+  *)
+    echo "Usage: $0 {start|stop|status|restart}"
+    RETVAL=1
+esac
+
+exit $RETVAL
