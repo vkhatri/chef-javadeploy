@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Chef Java Deploy by vkhatri</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Chef Java Deploy</h1>
+        <p>Chef cookbook to Deploy/Manage Java Projects/Repositories</p>
+        <p class="view"><a href="https://github.com/vkhatri/chef-javadeploy">View the Project on GitHub <small>vkhatri/chef-javadeploy</small></a></p>
+        <ul>
+          <li><a href="https://github.com/vkhatri/chef-javadeploy/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/vkhatri/chef-javadeploy/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/vkhatri/chef-javadeploy">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="javadeploy-cookbook" class="anchor" href="#javadeploy-cookbook" aria-hidden="true"><span class="octicon octicon-link"></span></a>javadeploy Cookbook</h1>
+
+<p><a href="https://travis-ci.org/vkhatri/chef-javadeploy"><img src="https://travis-ci.org/vkhatri/chef-javadeploy.svg?branch=master" alt="Build Status"></a></p>
+
+<p>This is a <a href="https://www.getchef.com/chef/">Chef</a> cookbook to Deploy/Manage <code>Java</code> Projects/Repositories.</p>
+
+<p>This cookbook makes deploying a Java Git Repository (with tag/revision control) very
+easy and efficient.</p>
+
+<p>It setup any Java project as a Service with Java Options.</p>
+
+<p>More details yet to be updated.</p>
+
+<h2>
+<a id="repository" class="anchor" href="#repository" aria-hidden="true"><span class="octicon octicon-link"></span></a>Repository</h2>
+
+<p><a href="https://github.com/vkhatri/chef-javadeploy">https://github.com/vkhatri/chef-javadeploy</a></p>
+
+<h2>
+<a id="supported-jdk-versions" class="anchor" href="#supported-jdk-versions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Supported JDK Versions</h2>
+
+<p>There is not limitation on Java to use this cookbook.</p>
+
+<p>Java is setup and managed by <code>java</code> cookbook.</p>
+
+<h2>
+<a id="cookbook-dependencies" class="anchor" href="#cookbook-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Dependencies</h2>
+
+<ul>
+<li>
+<code>ulimit</code> cookbook</li>
+<li>
+<code>java</code> cookbook</li>
+</ul>
+
+<h2>
+<a id="recipes" class="anchor" href="#recipes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Recipes</h2>
+
+<ul>
+<li><p><code>javadeploy::default</code>     - default cookbook, wrapper for cookbook recipes</p></li>
+<li><p><code>javadeploy::java</code>        - recipe to setup java</p></li>
+<li><p><code>javadeploy::user</code>        - recipe to setup user for java services</p></li>
+<li><p><code>javadeploy::core</code>        - recipe to setup core cookbook resources</p></li>
+</ul>
+
+<h2>
+<a id="javadeploy-lwrp" class="anchor" href="#javadeploy-lwrp" aria-hidden="true"><span class="octicon octicon-link"></span></a>javadeploy LWRP</h2>
+
+<p><strong>LWRP example</strong></p>
+
+<p><em>Create a java project using LWRP:</em></p>
+
+<pre><code>javadeploy 'repository' do
+  option value
+end
+</code></pre>
+
+<p><em>Delete a java project using LWRP:</em></p>
+
+<pre><code>javadeploy 'repository' do
+  option value
+  action :delete
+end
+</code></pre>
+
+<p><strong>LWRP Options</strong></p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>
+<em>repository_url (required)</em>     - java project git repository</li>
+<li>
+<em>action (optional)</em>         - default :create, options: :create, :delete</li>
+<li>
+<em>user (optional)</em>           - service/directory/file user permission, default value <code>node[:javadeploy][:user]</code>
+</li>
+<li>
+<em>group (optional)</em>          - service/directory/file group permission, default value <code>node[:javadeploy][:group]</code>
+</li>
+<li>...</li>
+</ul>
+
+<h2>
+<a id="cookbook-advanced-attributes" class="anchor" href="#cookbook-advanced-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Advanced Attributes</h2>
+
+<ul>
+<li><p><code>default[:javadeploy][:install_java]</code> (default: <code>true</code>): setup java, disable to manage java outside of this cookbook</p></li>
+<li><p><code>default[:javadeploy][:manage_user]</code> (default: <code>true</code>): setup service user</p></li>
+<li><p><code>default[:javadeploy][:console_log]</code> (default: <code>true</code>): enable console log capture to a log file</p></li>
+<li><p><code>default[:javadeploy][:notify_restart]</code> (default: <code>true</code>): notify service restart upon a resource create/update</p></li>
+<li><p><code>default[:javadeploy][:purge]</code> (default: <code>true</code>): purge a repository revisions, if set keeps only provided set of revisions checkout</p></li>
+<li><p><code>default[:javadeploy][:repositories]</code> (default: <code>true</code>): repositories to setup using lwrp from <code>databag</code> source</p></li>
+<li><p><code>default[:javadeploy][:revision_override][:fqdn]</code> (default: <code>true</code>): repositories revision override for a <code>fqdn</code></p></li>
+<li><p><code>default[:javadeploy][:revision_override][:flock]</code> (default: <code>true</code>): repositories revision override for a <code>cluster or flock</code></p></li>
+<li><p><code>default[:javadeploy][:revision_override][:environment]</code> (default: <code>true</code>): repositories revision override for an <code>environment</code></p></li>
+<li><del> `default[:javadeploy][:databag]` (default: `javadeploy`): databag source for repositories, not yet supported </del></li>
+</ul>
+
+<h2>
+<a id="cookbook-core-attributes" class="anchor" href="#cookbook-core-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Core Attributes</h2>
+
+<ul>
+<li><p><code>default[:javadeploy][:base_dir]</code> (default: <code>/opt/javadeploy</code>): base directory for repositories, logs etc.</p></li>
+<li><p><code>default[:javadeploy][:user]</code> (default: <code>jdeploy</code>): javadeploy default service user</p></li>
+<li><p><code>default[:javadeploy][:group]</code> (default: <code>jdeploy</code>): javadeploy service user group</p></li>
+<li><p><code>default[:javadeploy][:group]</code> (default: <code>dir_mode</code>): javadeploy resources dir/files default mode permissions</p></li>
+<li><p><code>default[:javadeploy][:log_dir]</code> (default: <code>/opt/javadeploy/logs</code>): javadeploy service log file</p></li>
+<li><p><code>default[:javadeploy][:repositories_dir]</code> (default: <code>/opt/javadeploy/repositories</code>): home directory for a java repository</p></li>
+<li><p><code>default[:javadeploy][:manage_service]</code> (default: <code>true</code>): if set, will create a service for a java repository with provided options</p></li>
+<li><p><code>default[:javadeploy][:java_options]</code> (default: <code>[]</code>): default java options for lwrp</p></li>
+<li><p><code>default[:javadeploy][:current_revision]</code> (default: <code>master</code>): default git repository revision for lwrp repository resource</p></li>
+</ul>
+
+<h2>
+<a id="cookbook-ulimit-attributes" class="anchor" href="#cookbook-ulimit-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Ulimit Attributes</h2>
+
+<ul>
+<li><p><code>default[:javadeploy][:limits][:memlock]</code> (default: <code>unlimited</code>): service user memory limit</p></li>
+<li><p><code>default[:javadeploy][:limits][:nofile]</code> (default: <code>48000</code>): service user file limit</p></li>
+<li><p><code>default[:javadeploy][:limits][:nproc]</code> (default: <code>unlimited</code>): service user process limit</p></li>
+</ul>
+
+<h2>
+<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODO</h2>
+
+<ul>
+<li>add databag source</li>
+<li>add revision override feature</li>
+<li>add ssh key wrapper cookbook for key/wrapper management from a databag</li>
+</ul>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<ol>
+<li>Fork the repository on Github</li>
+<li>Create a named feature branch (like <code>add_component_x</code>)</li>
+<li>Write your change</li>
+<li>Write tests for your change (if applicable)</li>
+<li>Run the tests (<code>rake</code>), ensuring they all pass</li>
+<li>Write new resource/attribute description to <code>README.md</code>
+</li>
+<li>Write description about changes to PR</li>
+<li>Submit a Pull Request using Github</li>
+</ol>
+
+<h2>
+<a id="copyright--license" class="anchor" href="#copyright--license" aria-hidden="true"><span class="octicon octicon-link"></span></a>Copyright &amp; License</h2>
+
+<p>Authors:: Virender Khatri and <a href="https://github.com/vkhatri/chef-javadeploy/graphs/contributors">Contributors</a></p>
+
+<pre>
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</pre>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/vkhatri">vkhatri</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
