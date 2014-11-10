@@ -14,7 +14,7 @@ More details yet to be updated.
 
 ## Repository
 
-http://vkhatri.github.io/chef-javadeploy
+https://github.com/vkhatri/chef-javadeploy
 
 
 ## Supported JDK Versions
