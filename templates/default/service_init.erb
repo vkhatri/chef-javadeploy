@@ -1,11 +1,22 @@
 #!/bin/bash
-#
+
 # This file is managed by Chef.
-# Do NOT modify this file directly.
+# DO NOT MODIFY this file locally, it will be overwritten by Chef.
 #
+### BEGIN INIT INFO
 # chkconfig: 345 20 80
 # description: <%= @service_name -%> daemon
 # processname: <%= @service_name %>
+#
+# Provides:          <%= @service_name %>
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: <%= @service_name -%> daemon
+# Description:       <%= @service_name -%> service for
+#                    <%= @service_name -%> java project repository.
+### END INIT INFO
+
+PLATFORM_FAMILY=<%= node['platform_family'] %>
 
 SERVICE_USER=<%= @user %>
 SERVICE_GROUP=<%= @group %>
@@ -21,6 +32,9 @@ test -d $SERVICE_BASE || {
   echo -n "$SERVICE_HOME does not exists or has stale symlink" ;
   exit 1 ;
 }
+
+SERVICE_IDENTIFIER="<%= @service_name %>.dummy_process_identifier"
+SERVICE_IDENTIFIER_OPTION="-Ddummy_process_identifier.value=$SERVICE_IDENTIFIER"
 
 JAVA_BINARY=`which java`
 test -x $JAVA_BINARY || {
@@ -48,7 +62,7 @@ CLASS_NAME="<%= @class_name -%>"
 
 . /etc/init.d/functions
 
-SERVICE_EXEC="$JAVA_BINARY $CLASS_PATH $JAR_FILE $JAVA_OPTIONS $CLASS_NAME $JAVA_ARGS"
+JAVA_OPTIONS="$CLASS_PATH $JAR_FILE $JAVA_OPTIONS $SERVICE_IDENTIFIER_OPTION $CLASS_NAME $JAVA_ARGS"
 
 RETVAL=0
 
@@ -58,11 +72,11 @@ service_start_pre_check() {
     process_pid=$(cat $PID_FILE)
     ps -p $process_pid > /dev/null
     if [ $? == 0 ]; then
-      echo -n "$PROGRAM is already running (pid $process_pid) .."
+      echo -n "$PROGRAM is already running ($PID_FILE)"
       echo
       exit 0
     else
-      echo -n "$PROGRAM is dead and pid file exists ($PID_FILE) .."
+      echo -n "$PROGRAM is dead and pid file exists($PID_FILE)"
       echo
       exit 1
     fi
@@ -71,67 +85,163 @@ service_start_pre_check() {
 
 service_stop_pre_check() {
   if [ ! -f $PID_FILE ]; then
-    echo "$PROGRAM is already stopped "
-    # echo_success
+    echo -n "$PROGRAM is already stopped"
+    echo
     exit 0
   else
     process_pid=$(cat $PID_FILE)
     ps -p $process_pid > /dev/null
     if [ $? != 0 ]; then
       rm -fr $PID_FILE
-      echo "$PROGRAM is dead and pid file exists ($PID_FILE). pid file removed "
-      # echo_success
+      echo "$PROGRAM is dead and pid file exists($PID_FILE) .. pid file removed"
+      echo
       exit 0
     fi
   fi
-  echo
 }
 
-service_start() {
+# RHEL Platform Family Service Management
+rhel_service_start() {
     service_start_pre_check
     echo -n "Starting $PROGRAM .."
-    daemon --user $SERVICE_USER $SERVICE_EXEC -p $PID_FILE $LOG_FILE
+    daemon --user $SERVICE_USER --pidfile $PID_FILE $JAVA_BINARY $JAVA_OPTIONS $LOG_FILE &
     RETVAL=$?
+    sleep 5
     if [ $RETVAL = 0 ]; then
-      echo_success
+      # get PID
+      /bin/ps hww -u "$SERVICE_USER" -o sess,ppid,pid,comm,cmd | \
+        while read sess ppid pid comm cmd; do
+          # Check Service Name
+          service_exec=$(echo $comm| tr -d ' ')
+          if [ $service_exec == 'java' ]; then
+            echo $cmd | grep "$SERVICE_IDENTIFIER" > /dev/null
+            if [ $? = 0 ]; then
+              # found PID
+              echo $pid > $PID_FILE
+              break
+            fi
+          fi
+        done
+      if [ -s $PID_FILE ]; then
+        success
+      else
+        echo -n "failed to update pid file "
+        failure
+      fi
     else
-      echo_failure
+      failure
     fi
     echo
-    return $RETVAL
 }
 
-service_stop() {
+rhel_service_stop() {
   service_stop_pre_check
-  echo -n "Shutting down $PROGRAM .. "
+  echo -n "Stopping $PROGRAM .."
   killproc -p $PID_FILE $PROGRAM
   RETVAL=$?
-  echo_success
+  echo
+
 }
 
-service_status() {
+rhel_service_status() {
     status -p $PID_FILE $PROGRAM
     RETVAL=$?
 }
 
-case "$1" in
-  start)
-    service_start
-  ;;
-  stop)
-    service_stop
-  ;;
-  status)
-    service_status
-  ;;
-  restart)
-    service_stop
-    sleep $WAIT_FOR_START
-    service_start
-  ;;
+# Debian Platform Family Service Management
+debian_service_start() {
+    service_start_pre_check
+    start-stop-daemon --start --background --make-pidfile --chuid $SERVICE_USER --user $SERVICE_USER --pidfile $PID_FILE --exec $JAVA_BINARY -- $JAVA_OPTIONS $LOG_FILE
+    RETVAL=$?
+    if [ $RETVAL == 0 ]; then
+      log_success_msg "Starting $PROGRAM                 [OK]"
+    else
+      log_failure_msg "Starting $PROGRAM                 [FAILED]"
+    fi
+}
+
+debian_service_stop() {
+  service_stop_pre_check
+  #killproc -p $PID_FILE
+  start-stop-daemon --stop --exec $JAVA_BINARY --pidfile $PID_FILE
+  RETVAL=$?
+  if [ $RETVAL == 0 ]; then
+    rm -f $PID_FILE
+    log_success_msg "Stopping $PROGRAM              [OK]"
+  else
+    log_failure_msg "Stopping $PROGRAM              [FAILED]"
+  fi
+}
+
+debian_service_status() {
+  #status_of_proc -p $PID_FILE $JAVA_BINARY $PROGRAM
+  #RETVAL=$?
+  if [ -s $PID_FILE ]; then
+    process_pid=$(cat $PID_FILE)
+    ps -p $process_pid > /dev/null
+    if [ $? == 0 ]; then
+      echo -n "Service is running($process_pid) .."
+      echo
+      RETVAL=0
+    else
+      echo -n "Service is dead and pid file exists($PID_FILE) .."
+      echo
+      RETVAL=1
+    fi
+  else
+    echo -n "Service is not running .."
+    echo
+    RETVAL=3
+  fi
+}
+
+# Process Service Action
+case "$PLATFORM_FAMILY" in
+  rhel)
+    case "$1" in
+      start)
+        rhel_service_start
+        ;;
+      stop)
+        rhel_service_stop
+        ;;
+      status)
+        rhel_service_status
+        ;;
+      restart)
+        rhel_service_stop
+        sleep 5
+        rhel_service_start
+        ;;
+      *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=1
+    esac
+    ;;
+  debian)
+    case "$1" in
+      start)
+        debian_service_start
+        ;;
+      stop)
+        debian_service_stop
+        ;;
+      status)
+        debian_service_status
+        ;;
+      restart)
+        debian_service_stop
+        sleep 5
+        debian_service_start
+        ;;
+      *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        RETVAL=1
+    esac
+    ;;
   *)
-    echo "Usage: $0 {start|stop|status|restart}"
-    RETVAL=1
+    echo "Unkown Platform Family, valid are 'debian rhel'"
+    RETVAL 1
 esac
 
 exit $RETVAL

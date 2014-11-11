@@ -23,8 +23,8 @@ default_action :create
 
 attribute :service_name,      :kind_of => String, :default => nil
 attribute :manage_service,    :kind_of => String, :default => node['javadeploy']['manage_service']
-attribute :service_action,    :kind_of => String, :default => [:start, :enable]
-attribute :service_supports,  :kind_of => Array, :default => [:status => true, :start => true, :stop => true, :restart => true]
+attribute :service_action,    :kind_of => String, :default => %w(start enable)
+attribute :service_supports,  :kind_of => Array, :default => { :status => true, :start => true, :stop => true, :restart => true }
 
 attribute :user,    :kind_of => String, :default => node['javadeploy']['user']
 attribute :group,   :kind_of => String, :default => node['javadeploy']['group']

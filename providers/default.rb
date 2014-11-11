@@ -31,6 +31,10 @@ end
 
 protected
 
+def databag_repository(repository)
+  puts "TODO fetch repository from data bag #{repository}"
+end
+
 def repository
   if new_resource.action == :create
     resource_action = :create
@@ -51,6 +55,7 @@ def repository
     owner new_resource.user
     group new_resource.group
     mode new_resource.dir_mode
+    recursive true
     action resource_action
   end
 
@@ -61,6 +66,7 @@ def repository
     owner new_resource.user
     group new_resource.group
     mode new_resource.dir_mode
+    recursive true
     action resource_action
   end
 
@@ -124,7 +130,7 @@ def repository
 
   pid_file = ::File.join(repo_home, 'service.pid')
   log_file = new_resource.console_log ? ::File.join(node['javadeploy']['log_dir'], "#{repo_name}.log") : '/dev/null'
-  class_path = new_resource.class_path.map { |cp| ::File.join(repo_home, cp) }
+  class_path = new_resource.class_path.map { |cp| ::File.join(default_revision_dir, cp) }
   class_path += new_resource.ext_class_path
   if class_path.empty?
     class_path = '-cp ' + repo_home
@@ -173,10 +179,9 @@ def repository
     case node['javadeploy']['init_style']
     when 'upstart'
       provider Chef::Provider::Service::Upstart
-    else
-      provider Chef::Provider::Service::Init
     end
     supports new_resource.service_supports
+    only_if { setup_resource }
     action new_resource.service_action
   end
 end
