@@ -134,18 +134,24 @@ def repository
   end
 
   # revisions
-  if new_resource.databag_revision
+  if new_resource.file_revision && ::File.exist?(new_resource.file_revision)
+    file_revision = JSON.parse(::File.open(new_resource.file_revision).read)
+    repository_other_revisions = file_revision['repositories'][repo_name]['other_revisions']
+    repository_current_revision = file_revision['repositories'][repo_name]['current_revision']
+  elsif new_resource.databag_revision
     repository_other_revisions = other_revisions(repo_name)
     repository_current_revision = current_revision(repo_name)
   else
     repository_other_revisions = new_resource.other_revisions
-    repository_current_revision new_resource.current_revision
+    repository_current_revision = new_resource.current_revision
   end
+
+  fail "unable to determine 'current_revision' for repository '#{repo_name}'" unless repository_current_revision
 
   default_revision_dir = ::File.join(repo_revisions_dir, 'default')
   current_revision_dir = ::File.join(repo_revisions_dir, repository_current_revision)
 
-  repo_revisions = repository_other_revisions
+  repo_revisions = repository_other_revisions || []
   repo_revisions.push repository_current_revision
 
   # purge stale revisions

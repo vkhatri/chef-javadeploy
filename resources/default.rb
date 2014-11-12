@@ -52,6 +52,7 @@ attribute :verify_file,     :kind_of => String, :default => nil
 attribute :other_revisions, :kind_of => Array, :default => []
 attribute :current_revision,    :kind_of => String, :default => node['javadeploy']['current_revision']
 attribute :databag_revision,    :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
+attribute :file_revision,       :kind_of => String, :default => node['javadeploy']['file_revision']
 
 attribute :pre_include_recipe,    :kind_of => Array, :default => []
 attribute :post_include_recipe,    :kind_of => Array, :default => []

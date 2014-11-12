@@ -4,8 +4,11 @@ default['javadeploy']['install_java'] = true
 # repositories collection definition data bag
 default['javadeploy']['databag'] = 'javadeploy'
 
-# use repository revision from a data bag
+# set repository revision from a data bag
 default['javadeploy']['databag_revision'] = true
+
+# set repository revision from a file
+default['javadeploy']['file_revision'] = nil
 
 # base directory
 default['javadeploy']['base_dir'] = '/opt/javadeploy'
