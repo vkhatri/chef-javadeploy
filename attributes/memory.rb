@@ -6,7 +6,7 @@ default['javadeploy']['set_java_xmx'] = true
 default['javadeploy']['system_memory'] = 768
 
 # Calculate -Xmx (Multiple of 1024)
-if node['javadeploy']['set_java_xmx'] && node['memory'] && node['memory'].key?('total')
+if node['memory'] && node['memory'].key?('total')
   total_memory = (node['memory']['total'].gsub('kB', '').to_i / 1024).to_i
   total_memory_percentage = (total_memory % 1024)
   system_memory = if total_memory < 2048

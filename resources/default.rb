@@ -35,9 +35,8 @@ attribute :repository_action,      :kind_of => String, :default => node['javadep
 
 attribute :ssh_key_wrapper_file,  :kind_of => String, :default => nil
 
-attribute :env_path,          :kind_of => String, :default => node['javadeploy']['env_path']
-
 attribute :console_log,     :kind_of => [TrueClass, FalseClass], :default => true
+
 attribute :verify_file,     :kind_of => String, :default => nil
 
 attribute :class_path,      :kind_of => Array,  :default => []
@@ -46,16 +45,18 @@ attribute :class_name,      :kind_of => String, :default => nil
 attribute :options,         :kind_of => Array,  :default => node['javadeploy']['java_options']
 attribute :jar,             :kind_of => String, :default => nil
 attribute :args,            :kind_of => Array,  :default => []
+attribute :auto_java_xmx,    :kind_of => [TrueClass, FalseClass],  :default => node['javadeploy']['set_java_xmx']
 
 attribute :verify_file,     :kind_of => String, :default => nil
 
 attribute :other_revisions, :kind_of => Array, :default => []
 attribute :current_revision,    :kind_of => String, :default => node['javadeploy']['current_revision']
+attribute :databag_revision,    :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
 
-attribute :notify_restart,      :kind_of => String, :default => nil
+attribute :pre_include_recipe,    :kind_of => Array, :default => []
+attribute :post_include_recipe,    :kind_of => Array, :default => []
 
 attribute :cookbook,            :kind_of => String, :default => 'javadeploy'
 attribute :notify_restart,      :kind_of => String, :default => nil
-
 attribute :purge,               :kind_of => String, :default => node['javadeploy']['purge']
 attribute :dir_mode,               :kind_of => String, :default => node['javadeploy']['dir_mode']

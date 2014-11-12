@@ -4,9 +4,6 @@ default['javadeploy']['install_java'] = true
 # repositories collection definition data bag
 default['javadeploy']['databag'] = 'javadeploy'
 
-# use repository revision from a data bag
-default['javadeploy']['databag_revision'] = true
-
 # base directory
 default['javadeploy']['base_dir'] = '/opt/javadeploy'
 
@@ -25,7 +22,17 @@ default['javadeploy']['console_log'] = true
 # notify repo service on resource/revision/etc. change
 default['javadeploy']['notify_restart'] = true
 
-# setup java repositories from node attribute
+# default['javadeploy']['override_precedence'] = 'databag'
+
+# repository revision override for node fqdn
+default['javadeploy']['override']['fqdn'] = {}
+
+# repository revision override for node cluster
+default['javadeploy']['override']['flock'] = {}
+
+# repository revision override for node environment
+default['javadeploy']['override']['environment'] = {}
+
 default['javadeploy']['repositories'] = {}
 
 # Other Attributes

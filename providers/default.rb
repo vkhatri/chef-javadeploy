@@ -31,8 +31,71 @@ end
 
 protected
 
-def databag_repository(repository)
-  puts "TODO fetch repository from data bag #{repository}"
+def current_revision(repository)
+  databag_revision(repository, 'current_revision')
+end
+
+def other_revisions(repository)
+  databag_revision(repository, 'other_revisions')
+end
+
+def databag_revision(repository, type)
+  revision = databag_revision_find(repository, type, 'fqdn')
+  unless revision
+    revision = databag_revision_find(repository, type, 'flock')
+    unless revision
+      revision = databag_revision_find(repository, type, 'environment')
+      unless revision
+        revision = databag_revision_find(repository, type, 'default')
+      end
+    end
+  end
+  revision
+end
+
+def databag_revision_find(repository, type, level)
+  #
+  # different databag items:
+  #   Each level / hierarchy is actually an item of the
+  #   databag with a perfix - 'revision'.
+  #
+  #   You must create below data bag items for revisions override
+  #   hierarchy:
+  #
+  #   - revision_fqdn
+  #   - revision_flock
+  #   - revision_environment
+  #   - revision_default
+  #
+  # databag item attribute:
+  #   Each data bag item must have an attribute - 'repositories' which
+  #   will have the repositories with only two attributes:
+  #
+  #   - current_revision
+  #   - other_revisions
+  #
+  # how a repository revision search happens in databag / items:
+  #   {databag name} / {level | hierarchy item name} / 'repositories' / {repository_name} / 'current_revision | other_revisions'
+  #
+  # hierarchy level:
+  #   1. fqdn
+  #   2. flock
+  #   3. environment
+  #   4. default
+  #
+  #   Note: Hierarchy means, a revision at 'fqdn' level overrides the default
+  #   and any other level revisions for a node.
+  #   If no revision exists for a node at 'fqdn' level, then 'flock' level will
+  #   be searched and so on.
+  #
+  databag = data_bag_item(node['javadeploy']['databag'], "revision_#{level}")
+  revisions = databag['repositories'][repository]
+  if revisions
+    rev = revisions[type]
+  else
+    rev = nil
+  end
+  rev
 end
 
 def repository
@@ -70,12 +133,20 @@ def repository
     action resource_action
   end
 
-  default_revision_dir = ::File.join(repo_revisions_dir, 'default')
-  current_revision_dir = ::File.join(repo_revisions_dir, new_resource.current_revision)
-
   # revisions
-  repo_revisions = new_resource.other_revisions
-  repo_revisions.push new_resource.current_revision
+  if new_resource.databag_revision
+    repository_other_revisions = other_revisions(repo_name)
+    repository_current_revision = current_revision(repo_name)
+  else
+    repository_other_revisions = new_resource.other_revisions
+    repository_current_revision new_resource.current_revision
+  end
+
+  default_revision_dir = ::File.join(repo_revisions_dir, 'default')
+  current_revision_dir = ::File.join(repo_revisions_dir, repository_current_revision)
+
+  repo_revisions = repository_other_revisions
+  repo_revisions.push repository_current_revision
 
   # purge stale revisions
   ruby_block "purge-revisions-#{repo_name}" do
@@ -138,6 +209,9 @@ def repository
     class_path = '-cp ' + class_path.join(':')
   end
 
+  # add auto calculated java max heap parameter
+  new_resource.options.push node['javadeploy']['auto_java_xmx'] if  resource.auto_java_xmx
+
   file log_file do
     owner new_resource.user
     group new_resource.group
@@ -169,10 +243,18 @@ def repository
     action resource_action
   end
 
+  new_resource.pre_include_recipe.each do |recipe|
+    include_recipe recipe
+  end
+
   link default_revision_dir do
     to current_revision_dir
     notifies :restart, "service[#{service_name}]", :delayed
     only_if { setup_resource && resource_action == :create }
+  end
+
+  new_resource.post_include_recipe.each do |recipe|
+    include_recipe recipe
   end
 
   service service_name do
