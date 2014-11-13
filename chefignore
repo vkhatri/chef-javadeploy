@@ -102,3 +102,6 @@ Berksfile.lock
 
 # Bundler
 Gemfile.lock
+
+# Data Bag Sample Files
+databag/
