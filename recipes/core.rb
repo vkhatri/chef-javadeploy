@@ -19,6 +19,7 @@
 
 [node['javadeploy']['base_dir'],
  node['javadeploy']['repositories_dir'],
+ node['javadeploy']['pid_dir'],
  node['javadeploy']['log_dir'],
  node['javadeploy']['ssh_key_wrapper_dir']
 ].each do |dir|

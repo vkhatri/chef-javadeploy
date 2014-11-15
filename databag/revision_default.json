@@ -1,0 +1,12 @@
+{
+  "id": "revision_default",
+  "description": "Default Revision",
+  "repositories": {
+    "default": {
+      "repository_name": {
+        "current_revision": "foo-rev-005",
+        "other_revisions": ["foo-rev-004", "foo-rev-003"]
+      }
+    }
+  }
+}

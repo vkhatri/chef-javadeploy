@@ -7,11 +7,16 @@ default['javadeploy']['databag'] = 'javadeploy'
 # set repository revision from a data bag
 default['javadeploy']['databag_revision'] = true
 
-# set repository revision from a file
-default['javadeploy']['file_revision'] = nil
+default['javadeploy']['flock_attribute'] = 'flock'
 
 # base directory
 default['javadeploy']['base_dir'] = '/opt/javadeploy'
+
+# repository service pid dir
+default['javadeploy']['pid_dir'] = ::File.join(node['javadeploy']['base_dir'], 'run')
+
+# set repository revision from a file
+default['javadeploy']['file_revision'] = ::File.join(node['javadeploy']['base_dir'], 'revisions.json')
 
 # service user
 default['javadeploy']['manage_user'] = true
@@ -27,6 +32,12 @@ default['javadeploy']['console_log'] = true
 
 # notify repo service on resource/revision/etc. change
 default['javadeploy']['notify_restart'] = true
+
+# service notify action on current revision change
+default['javadeploy']['revision_service_notify_action'] = :restart
+
+# delayed service notify on current revision change
+default['javadeploy']['revision_service_notify_timing'] = :delayed
 
 # setup java repositories from node attribute
 default['javadeploy']['repositories'] = {}

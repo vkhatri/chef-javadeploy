@@ -1,0 +1,12 @@
+{
+  "id": "revision_fqdn",
+  "description": "Node FQDN Revision",
+  "repositories": {
+    "host_fqdn": {
+      "repository_name": {
+        "current_revision": null,
+        "other_revisions": null
+      }
+    }
+  }
+}

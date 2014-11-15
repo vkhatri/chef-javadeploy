@@ -45,19 +45,28 @@ attribute :class_name,      :kind_of => String, :default => nil
 attribute :options,         :kind_of => Array,  :default => node['javadeploy']['java_options']
 attribute :jar,             :kind_of => String, :default => nil
 attribute :args,            :kind_of => Array,  :default => []
-attribute :auto_java_xmx,    :kind_of => [TrueClass, FalseClass],  :default => node['javadeploy']['set_java_xmx']
+attribute :auto_java_xmx,   :kind_of => [TrueClass, FalseClass],  :default => node['javadeploy']['set_java_xmx']
 
 attribute :verify_file,     :kind_of => String, :default => nil
 
-attribute :other_revisions, :kind_of => Array, :default => []
-attribute :current_revision,    :kind_of => String, :default => node['javadeploy']['current_revision']
-attribute :databag_revision,    :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
-attribute :file_revision,       :kind_of => String, :default => node['javadeploy']['file_revision']
+attribute :other_revisions,   :kind_of => Array, :default => []
+attribute :current_revision,  :kind_of => String, :default => node['javadeploy']['current_revision']
+attribute :databag_revision,  :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
+attribute :file_revision,     :kind_of => String, :default => node['javadeploy']['file_revision']
 
-attribute :pre_include_recipe,    :kind_of => Array, :default => []
-attribute :post_include_recipe,    :kind_of => Array, :default => []
+attribute :revision_service_notify_action,      :kind_of => String, :default => node['javadeploy']['revision_service_notify_action']
+attribute :revision_service_notify_timing,      :kind_of => String, :default => node['javadeploy']['revision_service_notify_timing']
 
-attribute :cookbook,            :kind_of => String, :default => 'javadeploy'
-attribute :notify_restart,      :kind_of => String, :default => nil
-attribute :purge,               :kind_of => String, :default => node['javadeploy']['purge']
-attribute :dir_mode,               :kind_of => String, :default => node['javadeploy']['dir_mode']
+attribute :cookbook,        :kind_of => String, :default => 'javadeploy'
+attribute :notify_restart,  :kind_of => String, :default => node['javadeploy']['notify_restart']
+attribute :purge,           :kind_of => String, :default => node['javadeploy']['purge']
+attribute :dir_mode,        :kind_of => String, :default => node['javadeploy']['dir_mode']
+
+# environment for data bag revision, defaults to node chef_environment
+# making environment optional goes against the point, but could
+# be very useful in some scenarios and testing
+attribute :environment, :kind_of => String, :default => node.chef_environment
+
+# node cluster / flock attribute, this could differ one setup to another, hence
+# optional to configure used node cluster attribute
+attribute :flock, :kind_of => String, :default => node[node['javadeploy']['flock_attribute']]

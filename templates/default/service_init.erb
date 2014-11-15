@@ -45,7 +45,7 @@ test -x $JAVA_BINARY || {
 WAIT_FOR_START=10
 
 # service options
-JAVA_OPTIONS="<%= @options -%>"
+JAVA_OPTIONS="$JAVA_OPTIONS <%= @options -%>"
 
 # jar file
 <% if @jar -%>
@@ -53,15 +53,26 @@ JAR_FILE="-jar <%= @jar -%>"
 <% end -%>
 
 # service options
-JAVA_ARGS="<%= @args -%>"
+JAVA_ARGS="$JAVA_ARGS <%= @args -%>"
 
 # class path
-CLASS_PATH="<%= @class_path -%>"
+CLASS_PATH="$CLASS_PATH <%= @class_path -%>"
 
+# class name
 CLASS_NAME="<%= @class_name -%>"
 
-. /etc/init.d/functions
+case $PLATFORM_FAMILY in
+  "debian")
+    functions_file=/lib/lsb/init-functions
+    ;;
+  "rhel")
+    functions_file=/etc/init.d/functions
+    ;;
+esac
 
+. $functions_file
+
+# java options
 JAVA_OPTIONS="$CLASS_PATH $JAR_FILE $JAVA_OPTIONS $SERVICE_IDENTIFIER_OPTION $CLASS_NAME $JAVA_ARGS"
 
 RETVAL=0
@@ -125,7 +136,6 @@ rhel_service_start() {
       if [ -s $PID_FILE ]; then
         success
       else
-        echo -n "failed to update pid file "
         failure
       fi
     else

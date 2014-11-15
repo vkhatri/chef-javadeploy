@@ -40,6 +40,7 @@ def other_revisions(repository)
 end
 
 def databag_revision(repository, type)
+  # may be deep merge is a better approach
   revision = databag_revision_find(repository, type, 'fqdn')
   unless revision
     revision = databag_revision_find(repository, type, 'flock')
@@ -54,6 +55,12 @@ def databag_revision(repository, type)
 end
 
 def databag_revision_find(repository, type, level)
+  puts "\n\n
+  repository=#{repository}
+  type=#{type}
+  level=#{level}
+  \n\n
+  "
   #
   # different databag items:
   #   Each level / hierarchy is actually an item of the
@@ -69,7 +76,7 @@ def databag_revision_find(repository, type, level)
   #
   # databag item attribute:
   #   Each data bag item must have an attribute - 'repositories' which
-  #   will have the repositories with only two attributes:
+  #   will have the repositories with two attributes:
   #
   #   - current_revision
   #   - other_revisions
@@ -89,13 +96,21 @@ def databag_revision_find(repository, type, level)
   #   be searched and so on.
   #
   databag = data_bag_item(node['javadeploy']['databag'], "revision_#{level}")
-  revisions = databag['repositories'][repository]
-  if revisions
-    rev = revisions[type]
-  else
-    rev = nil
+  fail "incorrect attributes, missing root element 'repositories' in databag item 'revision_#{level}'" unless databag.key?('repositories')
+  revision_value = nil
+  case level
+  when 'fqdn'
+    revision_value = databag['repositories'][node['fqdn']][repository] if databag['repositories'].key?(node['fqdn']) && node['fqdn']
+  when 'flock'
+    revision_value = databag['repositories'][new_resource.flock][repository] if new_resource.flock && databag['repositories'].key?(new_resource.flock)
+  when 'environment'
+    revision_value = databag['repositories'][new_resource.environment][repository] if new_resource.environment && databag['repositories'].key?(new_resource.environment)
+  when 'default'
+    fail "incorrect attribute, missing sub element 'default' in databag item 'revision_#{level}'" unless databag['repositories'].key?('default')
+    revision_value = databag['repositories']['default'][repository]
   end
-  rev
+  revision_value = revision_value[type] if revision_value
+  revision_value
 end
 
 def repository
@@ -133,46 +148,38 @@ def repository
     action resource_action
   end
 
+  repository_other_revisions = nil
+  repository_current_revision = nil
+  repo_revisions = []
+
   # revisions
   if new_resource.file_revision && ::File.exist?(new_resource.file_revision)
     file_revision = JSON.parse(::File.open(new_resource.file_revision).read)
+    fail "incorrect attributes, missing root element 'repositories' in revision file '#{new_resource.file_revision}'" unless file_revision.key?('repositories')
     repository_other_revisions = file_revision['repositories'][repo_name]['other_revisions']
     repository_current_revision = file_revision['repositories'][repo_name]['current_revision']
   elsif new_resource.databag_revision
     repository_other_revisions = other_revisions(repo_name)
     repository_current_revision = current_revision(repo_name)
-  else
-    repository_other_revisions = new_resource.other_revisions
-    repository_current_revision = new_resource.current_revision
   end
 
+  # unless file_revision or databag_revision is not set or unable to
+  # determine values, defaults to resource
+  repository_other_revisions = new_resource.other_revisions unless repository_other_revisions
+  repository_current_revision = new_resource.current_revision unless repository_current_revision
+
   fail "unable to determine 'current_revision' for repository '#{repo_name}'" unless repository_current_revision
+  fail "'current_revision' must be a String for repository '#{repo_name}'" unless repository_current_revision.is_a?(String)
+  fail "'other_revisions' must be an Array for repository '#{repo_name}'" unless repository_other_revisions.is_a?(Array)
 
   default_revision_dir = ::File.join(repo_revisions_dir, 'default')
   current_revision_dir = ::File.join(repo_revisions_dir, repository_current_revision)
 
-  repo_revisions = repository_other_revisions || []
+  Chef::Log.info("sync current_revision '#{repository_current_revision}' for repository '#{repo_name}'")
+  Chef::Log.info("sync other_revisions '#{repository_other_revisions.join(', ')}' for repository '#{repo_name}'")
+
+  repo_revisions = repository_other_revisions
   repo_revisions.push repository_current_revision
-
-  # purge stale revisions
-  ruby_block "purge-revisions-#{repo_name}" do
-    block do
-      require 'fileutils'
-      existing_revisions =  Dir.entries(repo_revisions_dir).reject { |a| a =~ /^\.{1,2}$/ }.sort
-      keep_revisions = repo_revisions.sort
-      keep_revisions.push 'default'
-      delete_revisions = existing_revisions - keep_revisions
-
-      delete_revisions.each do |rev|
-        rev_dir = ::File.join(repo_revisions_dir, rev)
-        if ::File.directory?(rev_dir)
-          FileUtils.rm_rf Dir.glob(rev_dir)
-          Chef::Log.warn("deleted revision #{rev_dir}")
-        end
-      end
-    end
-    only_if { setup_resource && new_resource.purge }
-  end
 
   # repo git ssh wrapper file
   # need to add resource
@@ -189,8 +196,10 @@ def repository
   #  only_if { setup_resource }
   # end
 
+  fail "missing ssh wrapper file '#{ssh_key_wrapper_file}'" if not ::File.readable?(ssh_key_wrapper_file)
+
   # sync repo revisions
-  repo_revisions.each do |revision|
+  repo_revisions.sort.uniq.each do |revision|
     git ::File.join(repo_revisions_dir, revision) do
       repository new_resource.repository_url
       revision revision
@@ -205,7 +214,7 @@ def repository
   # verify a file to validate a repository
   fail "verify file does not exists - #{new_resource.verify_file}" if new_resource.verify_file && !::File.join(default_revision_dir, new_resource.verify_file)
 
-  pid_file = ::File.join(repo_home, 'service.pid')
+  pid_file = ::File.join(node['javadeploy']['pid_dir'], "#{repo_name}.pid")
   log_file = new_resource.console_log ? ::File.join(node['javadeploy']['log_dir'], "#{repo_name}.log") : '/dev/null'
   class_path = new_resource.class_path.map { |cp| ::File.join(default_revision_dir, cp) }
   class_path += new_resource.ext_class_path
@@ -216,7 +225,7 @@ def repository
   end
 
   # add auto calculated java max heap parameter
-  new_resource.options.push node['javadeploy']['auto_java_xmx'] if  resource.auto_java_xmx
+  new_resource.options.push node['javadeploy']['auto_java_xmx'] if  new_resource.auto_java_xmx
 
   file log_file do
     owner new_resource.user
@@ -249,18 +258,30 @@ def repository
     action resource_action
   end
 
-  new_resource.pre_include_recipe.each do |recipe|
-    include_recipe recipe
-  end
-
   link default_revision_dir do
     to current_revision_dir
-    notifies :restart, "service[#{service_name}]", :delayed
+    notifies new_resource.revision_service_notify_action, "service[#{service_name}]", new_resource.revision_service_notify_timing if new_resource.notify_restart
     only_if { setup_resource && resource_action == :create }
   end
 
-  new_resource.post_include_recipe.each do |recipe|
-    include_recipe recipe
+  # purge stale revisions
+  ruby_block "purge-revisions-#{repo_name}" do
+    block do
+      require 'fileutils'
+      existing_revisions =  Dir.entries(repo_revisions_dir).reject { |a| a =~ /^\.{1,2}$/ }.sort
+      keep_revisions = repo_revisions.sort
+      keep_revisions.push 'default'
+      delete_revisions = existing_revisions - keep_revisions
+
+      delete_revisions.each do |rev|
+        rev_dir = ::File.join(repo_revisions_dir, rev)
+        if ::File.directory?(rev_dir)
+          FileUtils.rm_rf Dir.glob(rev_dir)
+          Chef::Log.warn("deleted revision #{rev_dir}")
+        end
+      end
+    end
+    only_if { setup_resource && new_resource.purge }
   end
 
   service service_name do
