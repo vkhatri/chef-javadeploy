@@ -196,7 +196,7 @@ def repository
   #  only_if { setup_resource }
   # end
 
-  fail "missing ssh wrapper file '#{ssh_key_wrapper_file}'" if not ::File.readable?(ssh_key_wrapper_file)
+  fail "missing ssh wrapper file '#{ssh_key_wrapper_file}'" unless ::File.readable?(ssh_key_wrapper_file)
 
   # sync repo revisions
   repo_revisions.sort.uniq.each do |revision|
