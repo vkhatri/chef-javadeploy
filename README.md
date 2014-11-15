@@ -43,7 +43,7 @@ Java is setup and managed by `java` cookbook.
 
 *Create a java service using LWRP:*
 
-   
+
     javadeploy 'GIT_REPOSITORY' do
 	  ssh_key_wrapper_file '/opt/javadeploy/ssh_key_wrapper/GIT_REPOSITORY_KEY.wrapper'
 	  repository_url 'git@github.com:GITHUB_USER/GIT_REPOSITORY.git'
@@ -54,9 +54,9 @@ Java is setup and managed by `java` cookbook.
     	"-Xdebug"
 	  ]
 	  class_name 'java.className'
-	  class_path ["config/#{node.environment}", 
-		'package/lib/*', 
-		'package/resources', 
+	  class_path ["config/#{node.environment}",
+		'package/lib/*',
+		'package/resources',
 		'package/*'
 	  ]
 	  console_log false
@@ -86,16 +86,16 @@ Parameters:
 - *user (optional)* - service/directory/file user, default `node['javadeploy']['user']`
 - *group (optional)* - service/directory/file group, default `node['javadeploy']['group']`
 - *dir_mode (optional)* - file/directory resource permissions, default `node['javadeploy']['dir_mode']`
-- 
+
 - *service_name (optional)* - repository service name, default `:name`
 - *manage_service (optional)* - create service for repository, default `node['javadeploy']['manage_service']`
 - *service_action (optional)* - service resource action, default `node['javadeploy']['service_action']`
 - *service_supports (optional)* - service resource supports attribute, default `node['javadeploy']['service_supports']`
 - *init_style (optional)* - managed service init style, default `node['javadeploy']['init_style']`
 
-- *ssh_key_wrapper_file (optional)* - git repository ssh wrapper file, default `nil` 
+- *ssh_key_wrapper_file (optional)* - git repository ssh wrapper file, default `nil`
 - *console_log (optional)* - whether to redirect console log to `#{:name}.log` file under `node['javadeploy']['log_dir']`, default `node['javadeploy']['console_log']`
-- *verify_file (optional)* - file location to validate under repository revision, e.g. `directory/file`, default `node['javadeploy']['verify_file']` 
+- *verify_file (optional)* - file location to validate under repository revision, e.g. `directory/file`, default `node['javadeploy']['verify_file']`
 
 - *class_path (optional)* - java class path under repository revision directory, default `node['javadeploy']['class_path']`
 - *ext_class_path (optional)* - java class path outside repository revision directory, default `node['javadeploy']['ext_class_path']`
@@ -105,7 +105,7 @@ Parameters:
 - *args (optional)* - java arguments, default `node['javadeploy']['args']`
 - *auto_java_xmx (optional)* - add java option `-Xmx` automatically to java options, default `node['javadeploy']['set_java_xmx']`
 
-- *environment (optional)* - node environment to determine repository revisions value from databag, default `node.environment` 
+- *environment (optional)* - node environment to determine repository revisions value from databag, default `node.environment`
 - *flock (optional)* - node flock/cluster name to determine repository revisions value from databag, default `node[node['javadeploy']['flock_attribute']]`
 - *current_revision (optional)* - repository current revision, default `node['javadeploy']['current_revision']`
 - *other_revisions (optional)* -  repository other revisions to keep, default `[]`
@@ -116,7 +116,7 @@ Parameters:
 - *revision_service_notify_action (optional)* - service notify action on revision change, default `node['javadeploy']['revision_service_notify_action']`
 - *revision_service_notify_timing (optional)* - service notify timing on revision change, default `node['javadeploy']['revision_service_notify_timing']`
 
-- *cookbook (optional)* - templates cookbook, default `javadeploy` 
+- *cookbook (optional)* - templates cookbook, default `javadeploy`
 - *purge (optional)* - purge repository revisions and keep only current_revision and other_revisions, default `node['javadeploy']['purge']`
 
 
@@ -147,10 +147,10 @@ revision for multiple repositories in a simplest way possible.
 
 **:file_revision**
 
-To configure repository `current` & `other` revisions value from a local file, set lwrp 
+To configure repository `current` & `other` revisions value from a local file, set lwrp
 resource attribute `:file_revision`.
 
-Default value for `:file_revision` resource attribute is `node['javadeploy']['file_revision']`. 
+Default value for `:file_revision` resource attribute is `node['javadeploy']['file_revision']`.
 
 If this file exist and contain revision attributes `current_revision` & `other_revisions` for the repository, `current` & `other` revisions value will be set from the `:file_revision` file.
 
@@ -160,7 +160,7 @@ Note: `:file_revision` gets `first` precedence to determine `current` & `other` 
 
 To determine repository `current` & `other` revisions value from databag, set attribute `:databag_revision` to true.
 
-Default value for `:databag_revision` resource attribute is `node['javadeploy']['databag_revision']`. 
+Default value for `:databag_revision` resource attribute is `node['javadeploy']['databag_revision']`.
 
 There are two scenarios if `:databag_revision` resource attribute is set:
 
@@ -191,11 +191,11 @@ Default value for resource attribute `other_revisions` is set to `[]`.
 
 ## Cookbook LWRP Revision using Resource Attributes
 
-As mentioned earlier there are two types of revisions `current` and `other`. 
+As mentioned earlier there are two types of revisions `current` and `other`.
 
 Both can be configured with in LWRP using resource attributes - `current_revision` & `other_revisions`.
 
-Resource attribute `other_revisions` is an Array resource to keep more than one older revisions, useful for roll back. 
+Resource attribute `other_revisions` is an Array resource to keep more than one older revisions, useful for roll back.
 
 Managing repository revision with in LWRP resource is a best way if revision always refers to a branch.
 
@@ -223,7 +223,7 @@ Local JSON file location is common for all repositories and configurable by attr
 		},
 	    "backend": {
 		  "other_revisions": ["rev01","rev02"]
-		}						
+		}
 	  }
 	}
 
@@ -232,7 +232,7 @@ Local JSON file location is common for all repositories and configurable by attr
 
 >> If a repository or repository revisions are not present in the file, LWRP will try to look up revisions in next configured precedence.
 
-Managing repoisitory revisions from a local json file could be a problem especially running in cloud infrastructure where node replacement or rebuils requires its preservation. 
+Managing repoisitory revisions from a local json file could be a problem especially running in cloud infrastructure where node replacement or rebuils requires its preservation.
 
 But, it is a quick solution to verify the revision without making any change in cookbook or data bag.
 
@@ -250,8 +250,8 @@ By setting attribute `node['javadeploy']['databag_revision']` to `true`, all rep
 
 **Data Bag Name**
 
-Cookbook data bag name is configurable by attribute `node['javadeploy']['databag']`.  
- 
+Cookbook data bag name is configurable by attribute `node['javadeploy']['databag']`.
+
 
 **Data Bag Items**
 
@@ -262,11 +262,16 @@ There are total four data bag items used by LWRP to maintain repository revision
 * revision_environment
 * revision_default
 
->> 		Hierarchy does not mean that LWRP performs any kind of attributes merge on different data bag items. 
-		It means if a value is found in a data bag item for repository `current_revision` or `other_revisions`, next data bag items will not be checked and will simply ignored.
+>> 		Hierarchy does not mean that LWRP performs any kind of attributes merge 
+	 on different data bag items.
+		It means if a value is found in a data bag item for repository 
+	 `current_revision` or `other_revisions`, next data bag items will 
+	 not be checked and will simply ignored.
 
->>		e.g. a repository revision is configured in data bag item `revision_fqdn` which means all other data bag items will be ignored.
-		If no revision is found in `revision_fqdn` data bag item, LWRP will check `revision_flock` and so on in the hierarchy.
+>>		e.g. a repository revision is configured in data bag item `revision_fqdn` 
+	 which means all other data bag items will be ignored.
+		If no revision is found in `revision_fqdn` data bag item, LWRP will check 
+		`revision_flock` and so on in the hierarchy.
 
 
 
@@ -286,7 +291,7 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": null,
 		  	"other_revisions": null
-		  }		  
+		  }
 		},
 	    "fqdn2": {
 		  "repository1": {
@@ -296,8 +301,8 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": null,
 		  	"other_revisions": null
-		  }		  
-		}		
+		  }
+		}
 	  }
 	}
 
@@ -316,7 +321,7 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": "rev",
 		  	"other_revisions": null
-		  }		  
+		  }
 		},
 	    "cluster2": {
 		  "repository1": {
@@ -326,11 +331,11 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": null,
 		  	"other_revisions": null
-		  }		  
-		}		
+		  }
+		}
 	  }
 	}
-	
+
 ***revision_environment***
 
 	{
@@ -345,7 +350,7 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": null,
 		  	"other_revisions": null
-		  }		  
+		  }
 		},
 	    "environment2": {
 		  "repository1": {
@@ -355,11 +360,11 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": null,
 		  	"other_revisions": ["rev"]
-		  }		  
-		}		
+		  }
+		}
 	  }
 	}
-	
+
 ***revision_default***
 
 	{
@@ -374,10 +379,10 @@ There are total four data bag items used by LWRP to maintain repository revision
 		  "repository2": {
 		  	"current_revision": null,
 		  	"other_revisions": ["rev"]
-		  }		  
+		  }
 		}
 	  }
-	}		
+	}
 
 ## Cookbook Revision Precedence Scenarios
 
