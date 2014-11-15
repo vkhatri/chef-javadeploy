@@ -74,7 +74,7 @@ default['javadeploy']['env_path'] = nil
 default['javadeploy']['init_style'] = 'init'
 
 default['javadeploy']['service_action'] = %w(start enable)
-default['javadeploy']['service_supports'] = { :status => true, :start => true, :stop => true, :restart => true }
+default['javadeploy']['service_supports'] = [:status => true, :start => true, :stop => true, :restart => true]
 
 default['javadeploy']['setup_ulimit'] = true
 

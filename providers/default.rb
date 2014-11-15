@@ -230,6 +230,9 @@ def repository
 
   link default_revision_dir do
     to current_revision_dir
+    owner new_resource.user
+    group new_resource.group
+    mode new_resource.dir_mode
     notifies new_resource.revision_service_notify_action, "service[#{service_name}]", new_resource.revision_service_notify_timing if new_resource.notify_restart
     only_if { setup_resource && resource_action == :create }
   end
@@ -255,7 +258,7 @@ def repository
   end
 
   service service_name do
-    case node['javadeploy']['init_style']
+    case new_resource.init_style
     when 'upstart'
       provider Chef::Provider::Service::Upstart
     end
