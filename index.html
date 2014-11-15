@@ -34,7 +34,11 @@
 
 <p>This is a <a href="https://www.getchef.com/chef/">Chef</a> cookbook to Deploy/Manage <code>Java</code> Projects Git Repositories.</p>
 
-<p>This cookbook deploys a multi revisions service for multiple Java Git Repository with ease of revision control hierarchy management.</p>
+<p>This cookbook deploys a multi revisions service for <code>Java</code> <code>Git</code> Repositories
+with ease of revision control management.</p>
+
+<p>More features and attributes will be added over time, <strong>feel free to contribute</strong>
+what you find missing!</p>
 
 <h2>
 <a id="repository" class="anchor" href="#repository" aria-hidden="true"><span class="octicon octicon-link"></span></a>Repository</h2>
@@ -49,6 +53,22 @@
 <p>Java is setup and managed by <code>java</code> cookbook.</p>
 
 <h2>
+<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODO</h2>
+
+<ul>
+<li>
+<p>Add git ssh wrapper capability to the cookbook</p>
+
+<pre><code>Currently cookbook does not manage git ssh wrapper and LWRP resource 
+attribute :ssh_key_wrapper_file must point to a wrapper file managed 
+separately.
+</code></pre>
+</li>
+<li><p>Add LWRP resource setup using node attribute <code>node['javadeploy']['repositories']</code> from data bag</p></li>
+<li><p>Add more init style</p></li>
+</ul>
+
+<h2>
 <a id="cookbook-dependencies" class="anchor" href="#cookbook-dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Dependencies</h2>
 
 <ul>
@@ -59,17 +79,22 @@
 </ul>
 
 <h2>
-<a id="recipes" class="anchor" href="#recipes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Recipes</h2>
+<a id="cookbook-recipes" class="anchor" href="#cookbook-recipes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Recipes</h2>
 
 <ul>
-<li><p><code>javadeploy::default</code>     - default cookbook, wrapper for cookbook recipes</p></li>
-<li><p><code>javadeploy::java</code>        - recipe to setup java</p></li>
-<li><p><code>javadeploy::user</code>        - recipe to setup user for java services</p></li>
-<li><p><code>javadeploy::core</code>        - recipe to setup core cookbook resources</p></li>
+<li><p><code>javadeploy::default</code> - default cookbook, wrapper for cookbook recipes</p></li>
+<li><p><code>javadeploy::java</code> - recipe to setup java</p></li>
+<li><p><code>javadeploy::user</code> - recipe to setup user for java services</p></li>
+<li><p><code>javadeploy::core</code> - recipe to setup core cookbook resources</p></li>
 </ul>
 
 <h2>
-<a id="javadeploy-lwrp" class="anchor" href="#javadeploy-lwrp" aria-hidden="true"><span class="octicon octicon-link"></span></a>javadeploy LWRP</h2>
+<a id="cookbook-lwrp" class="anchor" href="#cookbook-lwrp" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook LWRP</h2>
+
+<p>Cookbook default LWRP <code>javadeploy</code> can be used to setup multiple java git repositories.</p>
+
+<p>Note: LWRP resource attribute <code>:ssh_key_wrapper_file</code> must point to git ssh wrapper script
+file for git repository sync. Soon wrapper setup support will be added to the cookbook.</p>
 
 <p><strong>LWRP example</strong></p>
 
@@ -110,8 +135,8 @@ end
 
 <ul>
 <li>
-<em>name (required)</em> - repository name, default lwrp parameter</li>
-<li><p><em>action (optional)</em> - repository lwrp action, options: :create :delete, default <code>:create</code></p></li>
+<em>name (required)</em> - repository name, default LWRP parameter</li>
+<li><p><em>action (optional)</em> - repository LWRP action, options: :create :delete, default <code>:create</code></p></li>
 <li><p><em>repository_url (required)</em>  - java project git repository url</p></li>
 <li><p><em>repository_checkout (required)</em>  - java project git repository checkout action, default <code>node['javadeploy']['repository_checkout']</code></p></li>
 <li><p><em>user (optional)</em> - service/directory/file user, default <code>node['javadeploy']['user']</code></p></li>
@@ -152,7 +177,7 @@ end
 <em>args (optional)</em> - java arguments, default <code>node['javadeploy']['args']</code>
 </li>
 <li><p><em>auto_java_xmx (optional)</em> - add java option <code>-Xmx</code> automatically to java options, default <code>node['javadeploy']['set_java_xmx']</code></p></li>
-<li><p><em>environment (optional)</em> - node environment to determine repository revisions value from databag, default <code>node.environment</code></p></li>
+<li><p><em>environment (optional)</em> - node environment to determine repository revisions value from data bag, default <code>node.environment</code></p></li>
 <li>
 <em>flock (optional)</em> - node flock/cluster name to determine repository revisions value from databag, default <code>node[node['javadeploy']['flock_attribute']]</code>
 </li>
@@ -163,10 +188,10 @@ end
 <em>other_revisions (optional)</em> -  repository other revisions to keep, default <code>[]</code>
 </li>
 <li>
-<em>databag_revision (optional)</em> - whether to determine revision from a databag hierarchy, default <code>node['javadeploy']['databag_revision']</code>
+<em>databag_revision (optional)</em> - whether to determine revision from a data bag hierarchy, default <code>node['javadeploy']['databag_revision']</code>
 </li>
 <li><p><em>file_revision (optional)</em> - if a file name is specified &amp; file exists, determine revision from specified file, file must be a json file, default <code>node['javadeploy']['file_revision']</code></p></li>
-<li><p><em>notify_restart (optional)</em> - whether to notify service on resource udpate, default <code>node['javadeploy']['notify_restart']</code></p></li>
+<li><p><em>notify_restart (optional)</em> - whether to notify service on resource update, default <code>node['javadeploy']['notify_restart']</code></p></li>
 <li>
 <em>revision_service_notify_action (optional)</em> - service notify action on revision change, default <code>node['javadeploy']['revision_service_notify_action']</code>
 </li>
@@ -183,8 +208,8 @@ end
 <p>For a repository, revision is categorized into two types:</p>
 
 <ul>
-<li><p><code>current</code> - current revision or default revision on which java service will be running, it can be configured using LWRP attribute <code>current_revision</code> or defining attribute <code>current_revision</code> in local json file on node / databag hierarchy</p></li>
-<li><p><code>other</code> - other revision(s) or list of revisions which are meant to preserve on a node for roll back or other purposes, it can be configured using LWRP attribute <code>other_revisions</code> or defining attribute <code>other_revisions</code> in local json file on node / databag hierarchy</p></li>
+<li><p><code>current</code> - current revision or default revision on which java service will be running, it can be configured using LWRP attribute <code>current_revision</code> or defining attribute <code>current_revision</code> in local json file on node / data bag hierarchy</p></li>
+<li><p><code>other</code> - other revision(s) or list of revisions which are meant to preserve on a node for roll back or other purposes, it can be configured using LWRP attribute <code>other_revisions</code> or defining attribute <code>other_revisions</code> in local json file on node / data bag hierarchy</p></li>
 </ul>
 
 <h2>
@@ -199,14 +224,14 @@ end
 <li>
 <code>:file_revision</code> - from a local json file</li>
 <li>
-<code>:databag_revision</code> - from databag hierarchy of <code>node fqdn, node cluster, node environment or default revision</code>
+<code>:databag_revision</code> - from data bag hierarchy of <code>node fqdn, node cluster, node environment or default revision</code>
 </li>
 <li>
-<code>:current_revision &amp; :other_revisions</code> - using lwrp resource attributes <code>current_revision</code> &amp; <code>other_revisions</code>
+<code>:current_revision &amp; :other_revisions</code> - using LWRP resource attributes <code>current_revision</code> &amp; <code>other_revisions</code>
 </li>
 </ul>
 
-<p>Idea is to minimize the effort to change and manage
+<p>Idea is to minimise the effort to change and manage
 revision for multiple repositories in a simplest way possible.</p>
 
 <h4>
@@ -214,30 +239,30 @@ revision for multiple repositories in a simplest way possible.</p>
 
 <p><strong>:file_revision</strong></p>
 
-<p>To configure repository <code>current</code> &amp; <code>other</code> revisions value from a local file, set lwrp
+<p>To configure repository <code>current</code> &amp; <code>other</code> revisions value from a local file, set LWRP
 resource attribute <code>:file_revision</code>.</p>
 
 <p>Default value for <code>:file_revision</code> resource attribute is <code>node['javadeploy']['file_revision']</code>.</p>
 
 <p>If this file exist and contain revision attributes <code>current_revision</code> &amp; <code>other_revisions</code> for the repository, <code>current</code> &amp; <code>other</code> revisions value will be set from the <code>:file_revision</code> file.</p>
 
-<p>Note: <code>:file_revision</code> gets <code>first</code> precedence to determine <code>current</code> &amp; <code>other</code> revisions value and overrides <code>:databag_revision</code> and lwrp resource attributes <code>current_revision</code> &amp; <code>other_revision</code>.</p>
+<p>Note: <code>:file_revision</code> gets <code>first</code> precedence to determine <code>current</code> &amp; <code>other</code> revisions value and overrides <code>:databag_revision</code> and LWRP resource attributes <code>current_revision</code> &amp; <code>other_revision</code>.</p>
 
 <p><strong>:databag_revision</strong></p>
 
-<p>To determine repository <code>current</code> &amp; <code>other</code> revisions value from databag, set attribute <code>:databag_revision</code> to true.</p>
+<p>To determine repository <code>current</code> &amp; <code>other</code> revisions value from data bag, set attribute <code>:databag_revision</code> to true.</p>
 
 <p>Default value for <code>:databag_revision</code> resource attribute is <code>node['javadeploy']['databag_revision']</code>.</p>
 
 <p>There are two scenarios if <code>:databag_revision</code> resource attribute is set:</p>
 
 <ol>
-<li><p>If <code>:file_revision</code> resource attribute is defined and revision attribute value were found in <code>:file_revision</code> file, LWRP will <code>NOT</code> look up into databag items hierarchy.</p></li>
-<li><p>If <code>:file_revision</code> resource attribute is defined and revision attributes were <code>NOT</code> found in <code>:file_revision</code> file, LWRP will look up into databag items hierarchy.</p></li>
-<li><p>If <code>:file_revision</code> resoruce attribute is <code>NOT</code> defined, LWRP will simply lookup databag hierarchy to determine revision attributes.</p></li>
+<li><p>If <code>:file_revision</code> resource attribute is defined and revision attribute value were found in <code>:file_revision</code> file, LWRP will <code>NOT</code> look up into data bag items hierarchy.</p></li>
+<li><p>If <code>:file_revision</code> resource attribute is defined and revision attributes were <code>NOT</code> found in <code>:file_revision</code> file, LWRP will look up into data bag items hierarchy.</p></li>
+<li><p>If <code>:file_revision</code> resource attribute is <code>NOT</code> defined, LWRP will simply lookup data bag hierarchy to determine revision attributes.</p></li>
 </ol>
 
-<p>Note: <code>:databag_revision</code> gets <code>second</code> precedence to determine revisions value &amp; overrides lwrp resource attributes <code>current_revision</code> &amp; <code>other_revision</code></p>
+<p>Note: <code>:databag_revision</code> gets <code>second</code> precedence to determine revisions value &amp; overrides LWRP resource attributes <code>current_revision</code> &amp; <code>other_revision</code></p>
 
 <p><strong>:current_revision &amp; :other_revisions</strong></p>
 
@@ -296,15 +321,16 @@ resource attribute <code>:file_revision</code>.</p>
 }
 </code></pre>
 
-<blockquote>
-<blockquote>
-<p>If attribute <code>node['javadeploy']['file_revision']</code> is not configured, LWRP will not lookup local file for revisions value.</p>
+<p>Note:</p>
 
-<p>If a repository or repository revisions are not present in the file, LWRP will try to look up revisions in next configured precedence.</p>
-</blockquote>
-</blockquote>
+<pre><code>If attribute `node['javadeploy']['file_revision']` is not configured, 
+LWRP will not lookup local file for revisions value.
 
-<p>Managing repoisitory revisions from a local json file could be a problem especially running in cloud infrastructure where node replacement or rebuils requires its preservation.</p>
+If a repository or repository revision attributes are not present in the file, 
+LWRP will try to look up revisions in next configured precedence.
+</code></pre>
+
+<p>Managing repository revisions from a local json file could be a problem especially running in cloud infrastructure where node replacement or rebuild requires its preservation.</p>
 
 <p>But, it is a quick solution to verify the revision without making any change in cookbook or data bag.</p>
 
@@ -315,7 +341,7 @@ resource attribute <code>:file_revision</code>.</p>
 
 <p><strong>Enable Data Bag Revisions for One or All Repositories</strong></p>
 
-<p>To configure a repository revisions using databag, simply set lwrp resource attribute <code>:databag_revision</code>, default value is configured by attribute <code>node['javadeploy']['databag_revision']</code>.</p>
+<p>To configure a repository revisions using data bag, simply set LWRP resource attribute <code>:databag_revision</code>, default value is configured by attribute <code>node['javadeploy']['databag_revision']</code>.</p>
 
 <p>By setting attribute <code>node['javadeploy']['databag_revision']</code> to <code>true</code>, all repositories or LWRP resources will look up data bag for revisions depending upon the precedence.</p>
 
@@ -331,28 +357,26 @@ resource attribute <code>:file_revision</code>.</p>
 <li>revision_fqdn</li>
 <li>revision_flock</li>
 <li>revision_environment</li>
-<li>revision_default</li>
-</ul>
+<li>
+<p>revision_default</p>
 
-<blockquote>
-<blockquote>
-<pre><code> Hierarchy does not mean that LWRP performs any kind of attributes merge 
- on different data bag items.
-    It means if a value is found in a data bag item for repository 
- `current_revision` or `other_revisions`, next data bag items will 
- not be checked and will simply ignored.
+<pre><code>Hierarchy does not mean that LWRP performs any kind of attributes merge 
+on different data bag items.
+It means if a value is found in a data bag item for repository 
+'current_revision' or 'other_revisions', next data bag items will 
+not be checked and will simply ignored.
 
- e.g. a repository revision is configured in data bag item `revision_fqdn` 
- which means all other data bag items will be ignored.
-    If no revision is found in `revision_fqdn` data bag item, LWRP will check 
-    `revision_flock` and so on in the hierarchy.
+e.g. a repository revision is configured in data bag item `revision_fqdn` 
+which means all other data bag items will be ignored.
+If no revision is found in `revision_fqdn` data bag item, LWRP will check 
+`revision_flock` and so on in the hierarchy.
 </code></pre>
-</blockquote>
-</blockquote>
+</li>
+</ul>
 
 <p><strong>Data Bag Items Sample</strong></p>
 
-<p><strong><em>revision_fqdn</em></strong></p>
+<p><strong><em>item - revision_fqdn</em></strong></p>
 
 <pre><code>{
   "id": "revision_fqdn",
@@ -382,7 +406,7 @@ resource attribute <code>:file_revision</code>.</p>
 }
 </code></pre>
 
-<p><strong><em>revision_flock</em></strong></p>
+<p><strong><em>item - revision_flock</em></strong></p>
 
 <pre><code>{
   "id": "revision_fqdn",
@@ -412,7 +436,7 @@ resource attribute <code>:file_revision</code>.</p>
 }
 </code></pre>
 
-<p><strong><em>revision_environment</em></strong></p>
+<p><strong><em>item - revision_environment</em></strong></p>
 
 <pre><code>{
   "id": "revision_environment",
@@ -442,7 +466,7 @@ resource attribute <code>:file_revision</code>.</p>
 }
 </code></pre>
 
-<p><strong><em>revision_default</em></strong></p>
+<p><strong><em>item - revision_default</em></strong></p>
 
 <pre><code>{
   "id": "revision_fqdn",
@@ -472,16 +496,16 @@ resource attribute <code>:file_revision</code>.</p>
 
 <ul>
 <li><p><code>default[:javadeploy][:install_java]</code> (default: <code>true</code>): setup java, disable to manage java outside of this cookbook</p></li>
+<li><p><code>default[:javadeploy][:databag]</code> (default: <code>javadeploy</code>): data bag source for repositories, not yet supported</p></li>
+<li><p><code>default[:javadeploy][:databag_revision]</code> (default: <code>true</code>): enable repository revisions look up in data bag</p></li>
+<li><p><code>default[:javadeploy][:file_revision]</code> (default: <code>/opt/javadeploy/revisions.json</code>): json file to configure repository revisions from a local json file on node</p></li>
+<li><p><code>default[:javadeploy][:flock_attribute]</code> (default: <code>flock</code>): node cluster attribute name, e.g. <code>node['cluster_name']</code>, default to <code>node['flock']</code></p></li>
 <li><p><code>default[:javadeploy][:manage_user]</code> (default: <code>true</code>): setup service user</p></li>
-<li><p><code>default[:javadeploy][:console_log]</code> (default: <code>true</code>): enable console log capture to a log file</p></li>
+<li><p><code>default[:javadeploy][:console_log]</code> (default: <code>true</code>): capture console logs to a log file, default creates a log file under <code>node['javadeploy']['log_dir']</code> with repository name</p></li>
 <li><p><code>default[:javadeploy][:notify_restart]</code> (default: <code>true</code>): notify service restart upon a resource create/update</p></li>
 <li><p><code>default[:javadeploy][:purge]</code> (default: <code>true</code>): purge a repository revisions, if set keeps only provided set of revisions checkout</p></li>
-<li><p><code>default[:javadeploy][:repositories]</code> (default: <code>true</code>): repositories to setup using lwrp from <code>databag</code> source</p></li>
-<li><p><code>default[:javadeploy][:revision_override][:fqdn]</code> (default: <code>true</code>): repositories revision override for a <code>fqdn</code></p></li>
-<li><p><code>default[:javadeploy][:revision_override][:flock]</code> (default: <code>true</code>): repositories revision override for a <code>cluster or flock</code></p></li>
-<li><p><code>default[:javadeploy][:revision_override][:environment]</code> (default: <code>true</code>): repositories revision override for an <code>environment</code></p></li>
+<li><p><code>default[:javadeploy][:repositories]</code> (default: <code>true</code>): repositories to setup using LWRP from data bag</p></li>
 <li><p><code>default[:javadeploy][:init_style]</code> (default: <code>init</code>): init style for javadeploy repository service</p></li>
-<li><del> `default[:javadeploy][:databag]` (default: `javadeploy`): databag source for repositories, not yet supported </del></li>
 </ul>
 
 <h2>
@@ -489,34 +513,36 @@ resource attribute <code>:file_revision</code>.</p>
 
 <ul>
 <li><p><code>default[:javadeploy][:base_dir]</code> (default: <code>/opt/javadeploy</code>): base directory for repositories, logs etc.</p></li>
-<li><p><code>default[:javadeploy][:user]</code> (default: <code>jdeploy</code>): javadeploy default service user</p></li>
-<li><p><code>default[:javadeploy][:group]</code> (default: <code>jdeploy</code>): javadeploy service user group</p></li>
-<li><p><code>default[:javadeploy][:group]</code> (default: <code>dir_mode</code>): javadeploy resources dir/files default mode permissions</p></li>
+<li><p><code>default[:javadeploy][:pid_dir]</code> (default: <code>/opt/javadeploy/run</code>): process pid directory for repositories service etc.</p></li>
 <li><p><code>default[:javadeploy][:log_dir]</code> (default: <code>/opt/javadeploy/logs</code>): javadeploy service log file</p></li>
 <li><p><code>default[:javadeploy][:repositories_dir]</code> (default: <code>/opt/javadeploy/repositories</code>): home directory for a java repository</p></li>
+<li><p><code>default[:javadeploy][:user]</code> (default: <code>jdeploy</code>): javadeploy default service user</p></li>
+<li><p><code>default[:javadeploy][:group]</code> (default: <code>jdeploy</code>): javadeploy service user group</p></li>
+<li><p><code>default[:javadeploy][:dir_mode]</code> (default: <code>0755</code>): javadeploy resources dir/files default mode permissions</p></li>
 <li><p><code>default[:javadeploy][:manage_service]</code> (default: <code>true</code>): if set, will create a service for a java repository with provided options</p></li>
+<li><p><code>default[:javadeploy][:current_revision]</code> (default: <code>master</code>): default git repository revision for LWRP repository resource</p></li>
+<li><p><code>default[:javadeploy][:revision_service_notify_action]</code> (default: <code>:restart</code>): service notify action on revision change</p></li>
+<li><p><code>default[:javadeploy][:revision_service_notify_timing]</code> (default: <code>:delayed</code>): service notify timing on revision change</p></li>
+<li><p><code>default[:javadeploy][:repository_checkout]</code> (default: <code>:sync</code>): default repository check out action</p></li>
+<li><p><code>default[:javadeploy][:verify_file]</code> (default: <code>nil</code>): repository revision file to validate the revision</p></li>
 <li><p><code>default[:javadeploy][:java_options]</code> (default: <code>[]</code>): default java options for lwrp</p></li>
-<li><p><code>default[:javadeploy][:current_revision]</code> (default: <code>master</code>): default git repository revision for lwrp repository resource</p></li>
+<li><p><code>default[:javadeploy][:class_path]</code> (default: <code>[]</code>): default class path under repository revision path, e.g. <code>%w(config/* lib/* resources/*)</code></p></li>
+<li><p><code>default[:javadeploy][:ext_class_path]</code> (default: <code>[]</code>): default class path outside of repository revision path</p></li>
+<li><p><code>default[:javadeploy][:class_name]</code> (default: <code>nil</code>): default java class name</p></li>
+<li><p><code>default[:javadeploy][:jar]</code> (default: <code>nil</code>): default java jar file</p></li>
+<li><p><code>default[:javadeploy][:args]</code> (default: <code>[]</code>): default java arguments</p></li>
+<li><p><code>default[:javadeploy][:service_action]</code> (default: <code>['start', 'enable']</code>): default LWRP resource <code>:service_action</code> value</p></li>
+<li><p><code>default[:javadeploy][:service_supports]</code> (default: <code>[:status =&gt; true, :start =&gt; true, :stop =&gt; true, :restart =&gt; true]</code>): default LWRP resource <code>:service_supports</code> value</p></li>
 </ul>
 
 <h2>
 <a id="cookbook-ulimit-attributes" class="anchor" href="#cookbook-ulimit-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Ulimit Attributes</h2>
 
 <ul>
+<li><p><code>default[:javadeploy][:setup_limit]</code> (default: <code>true</code>): setup repository service user ulimit using ulimit cookbook</p></li>
 <li><p><code>default[:javadeploy][:limits][:memlock]</code> (default: <code>unlimited</code>): service user memory limit</p></li>
 <li><p><code>default[:javadeploy][:limits][:nofile]</code> (default: <code>48000</code>): service user file limit</p></li>
 <li><p><code>default[:javadeploy][:limits][:nproc]</code> (default: <code>unlimited</code>): service user process limit</p></li>
-</ul>
-
-<h2>
-<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>TODO</h2>
-
-<ul>
-<li>add databag source</li>
-<li>add revision override feature</li>
-<li>add ssh key wrapper cookbook for key/wrapper management from a databag</li>
-<li>add/test debian init script</li>
-<li>add more init style</li>
 </ul>
 
 <h2>
