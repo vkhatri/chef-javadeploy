@@ -55,12 +55,6 @@ def databag_revision(repository, type)
 end
 
 def databag_revision_find(repository, type, level)
-  puts "\n\n
-  repository=#{repository}
-  type=#{type}
-  level=#{level}
-  \n\n
-  "
   databag = data_bag_item(node['javadeploy']['databag'], "revision_#{level}")
   fail "incorrect attributes, missing root element 'repositories' in databag item 'revision_#{level}'" unless databag.key?('repositories')
   revision_value = nil
@@ -94,6 +88,11 @@ def repository
 
   # repo home
   repo_home = ::File.join(node['javadeploy']['repositories_dir'], repo_name)
+
+  service service_name do
+    not_if { setup_resource }
+    action :stop
+  end
 
   directory repo_home do
     owner new_resource.user
@@ -232,7 +231,6 @@ def repository
     to current_revision_dir
     owner new_resource.user
     group new_resource.group
-    mode new_resource.dir_mode
     notifies new_resource.revision_service_notify_action, "service[#{service_name}]", new_resource.revision_service_notify_timing if new_resource.notify_restart
     only_if { setup_resource && resource_action == :create }
   end

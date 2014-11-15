@@ -70,7 +70,6 @@ default['javadeploy']['args'] = []
 default['javadeploy']['java_options'] = []
 default['javadeploy']['current_revision'] = 'master'
 
-default['javadeploy']['env_path'] = nil
 default['javadeploy']['init_style'] = 'init'
 
 default['javadeploy']['service_action'] = %w(start enable)
