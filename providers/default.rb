@@ -61,40 +61,6 @@ def databag_revision_find(repository, type, level)
   level=#{level}
   \n\n
   "
-  #
-  # different databag items:
-  #   Each level / hierarchy is actually an item of the
-  #   databag with a perfix - 'revision'.
-  #
-  #   You must create below data bag items for revisions override
-  #   hierarchy:
-  #
-  #   - revision_fqdn
-  #   - revision_flock
-  #   - revision_environment
-  #   - revision_default
-  #
-  # databag item attribute:
-  #   Each data bag item must have an attribute - 'repositories' which
-  #   will have the repositories with two attributes:
-  #
-  #   - current_revision
-  #   - other_revisions
-  #
-  # how a repository revision search happens in databag / items:
-  #   {databag name} / {level | hierarchy item name} / 'repositories' / {repository_name} / 'current_revision | other_revisions'
-  #
-  # hierarchy level:
-  #   1. fqdn
-  #   2. flock
-  #   3. environment
-  #   4. default
-  #
-  #   Note: Hierarchy means, a revision at 'fqdn' level overrides the default
-  #   and any other level revisions for a node.
-  #   If no revision exists for a node at 'fqdn' level, then 'flock' level will
-  #   be searched and so on.
-  #
   databag = data_bag_item(node['javadeploy']['databag'], "revision_#{level}")
   fail "incorrect attributes, missing root element 'repositories' in databag item 'revision_#{level}'" unless databag.key?('repositories')
   revision_value = nil
@@ -152,19 +118,21 @@ def repository
   repository_current_revision = nil
   repo_revisions = []
 
-  # revisions
+  # file revisions
   if new_resource.file_revision && ::File.exist?(new_resource.file_revision)
     file_revision = JSON.parse(::File.open(new_resource.file_revision).read)
     fail "incorrect attributes, missing root element 'repositories' in revision file '#{new_resource.file_revision}'" unless file_revision.key?('repositories')
     repository_other_revisions = file_revision['repositories'][repo_name]['other_revisions']
     repository_current_revision = file_revision['repositories'][repo_name]['current_revision']
   elsif new_resource.databag_revision
+    # data bag revisions
     repository_other_revisions = other_revisions(repo_name)
     repository_current_revision = current_revision(repo_name)
   end
 
   # unless file_revision or databag_revision is not set or unable to
   # determine values, defaults to resource
+  # resource revisions
   repository_other_revisions = new_resource.other_revisions unless repository_other_revisions
   repository_current_revision = new_resource.current_revision unless repository_current_revision
 
@@ -183,7 +151,7 @@ def repository
 
   # repo git ssh wrapper file
   # need to add resource
-  ssh_key_wrapper_file = new_resource.ssh_key_wrapper_file || ::File.join(node['javadeploy']['ssh_key_wrapper_dir'], "#{new_resource.ssh_key_wrapper}_wrapper")
+  ssh_key_wrapper_file = new_resource.ssh_key_wrapper_file # || ::File.join(node['javadeploy']['ssh_key_wrapper_dir'], "#{new_resource.ssh_key_wrapper}_wrapper")
 
   # setup ssh_key_wrapper_file resource
   # ssh_key_wrapper repo_name do
@@ -206,7 +174,7 @@ def repository
       ssh_wrapper ssh_key_wrapper_file
       user new_resource.user
       group new_resource.group
-      action new_resource.repository_action
+      action new_resource.repository_checkout
       only_if { setup_resource }
     end
   end
@@ -234,6 +202,8 @@ def repository
     only_if { setup_resource && new_resource.console_log }
     action resource_action
   end
+
+  fail "missing :class_name for repository '#{repo_name}'" unless new_resource.class_name
 
   template "/etc/init.d/#{repo_name}" do
     cookbook new_resource.cookbook

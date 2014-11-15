@@ -55,13 +55,26 @@ default['javadeploy']['ssh_key_wrapper'] = 'javadeploy'
 default['javadeploy']['ssh_key_wrapper_secret'] = nil
 default['javadeploy']['ssh_key_wrapper_databag'] = 'javadeploy'
 
-default['javadeploy']['checkout_action'] = :sync
+default['javadeploy']['repository_checkout'] = :sync
 default['javadeploy']['manage_service'] = true
+
+# revision verify file
+default['javadeploy']['verify_file'] = nil
+
+default['javadeploy']['class_path'] = []
+default['javadeploy']['ext_class_path'] = []
+default['javadeploy']['class_name'] = nil
+default['javadeploy']['jar'] = nil
+default['javadeploy']['args'] = []
+
 default['javadeploy']['java_options'] = []
 default['javadeploy']['current_revision'] = 'master'
 
 default['javadeploy']['env_path'] = nil
 default['javadeploy']['init_style'] = 'init'
+
+default['javadeploy']['service_action'] = %w(start enable)
+default['javadeploy']['service_supports'] = { :status => true, :start => true, :stop => true, :restart => true }
 
 default['javadeploy']['setup_ulimit'] = true
 

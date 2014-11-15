@@ -21,52 +21,49 @@ actions :create, :delete
 
 default_action :create
 
-attribute :service_name,      :kind_of => String, :default => nil
-attribute :manage_service,    :kind_of => String, :default => node['javadeploy']['manage_service']
-attribute :service_action,    :kind_of => String, :default => %w(start enable)
-attribute :service_supports,  :kind_of => Array, :default => { :status => true, :start => true, :stop => true, :restart => true }
+attribute :repository_url,      :kind_of => String, :required => true, :default => nil
+attribute :repository_checkout,      :kind_of => String, :default => node['javadeploy']['repository_checkout']
 
 attribute :user,    :kind_of => String, :default => node['javadeploy']['user']
 attribute :group,   :kind_of => String, :default => node['javadeploy']['group']
+attribute :dir_mode,        :kind_of => String, :default => node['javadeploy']['dir_mode']
+
+attribute :service_name,      :kind_of => String, :default => nil
+attribute :manage_service,    :kind_of => String, :default => node['javadeploy']['manage_service']
+attribute :service_action,    :kind_of => String, :default => node['javadeploy']['service_action']
+attribute :service_supports,  :kind_of => Hash, :default => node['javadeploy']['service_supports']
 attribute :init_style,      :kind_of => String, :default => node['javadeploy']['init_style']
 
-attribute :repository_url,      :kind_of => String, :required => true, :default => nil
-attribute :repository_action,      :kind_of => String, :default => node['javadeploy']['checkout_action']
-
 attribute :ssh_key_wrapper_file,  :kind_of => String, :default => nil
+attribute :console_log,     :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['console_log']
+attribute :verify_file,     :kind_of => String, :default => node['javadeploy']['verify_file']
 
-attribute :console_log,     :kind_of => [TrueClass, FalseClass], :default => true
-
-attribute :verify_file,     :kind_of => String, :default => nil
-
-attribute :class_path,      :kind_of => Array,  :default => []
-attribute :ext_class_path,  :kind_of => Array, :default => []
-attribute :class_name,      :kind_of => String, :default => nil
+attribute :class_path,      :kind_of => Array,  :default => node['javadeploy']['class_path']
+attribute :ext_class_path,  :kind_of => Array, :default => node['javadeploy']['ext_class_path']
+attribute :class_name,      :kind_of => String, :default => node['javadeploy']['class_name']
 attribute :options,         :kind_of => Array,  :default => node['javadeploy']['java_options']
-attribute :jar,             :kind_of => String, :default => nil
-attribute :args,            :kind_of => Array,  :default => []
+attribute :jar,             :kind_of => String, :default => node['javadeploy']['jar']
+attribute :args,            :kind_of => Array,  :default => node['javadeploy']['args']
 attribute :auto_java_xmx,   :kind_of => [TrueClass, FalseClass],  :default => node['javadeploy']['set_java_xmx']
 
-attribute :verify_file,     :kind_of => String, :default => nil
+# environment for data bag revision, defaults to node chef_environment
+# making environment optional goes against the point, but could
+# be very useful in some scenarios and testing
+attribute :environment, :kind_of => String, :default => node.environment
+
+# node cluster / flock attribute, this could differ one setup to another, hence
+# optional to configure used node cluster attribute
+attribute :flock, :kind_of => String, :default => node[node['javadeploy']['flock_attribute']]
 
 attribute :other_revisions,   :kind_of => Array, :default => []
 attribute :current_revision,  :kind_of => String, :default => node['javadeploy']['current_revision']
 attribute :databag_revision,  :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
 attribute :file_revision,     :kind_of => String, :default => node['javadeploy']['file_revision']
 
+attribute :notify_restart,  :kind_of => String, :default => node['javadeploy']['notify_restart']
 attribute :revision_service_notify_action,      :kind_of => String, :default => node['javadeploy']['revision_service_notify_action']
 attribute :revision_service_notify_timing,      :kind_of => String, :default => node['javadeploy']['revision_service_notify_timing']
 
 attribute :cookbook,        :kind_of => String, :default => 'javadeploy'
-attribute :notify_restart,  :kind_of => String, :default => node['javadeploy']['notify_restart']
+
 attribute :purge,           :kind_of => String, :default => node['javadeploy']['purge']
-attribute :dir_mode,        :kind_of => String, :default => node['javadeploy']['dir_mode']
-
-# environment for data bag revision, defaults to node chef_environment
-# making environment optional goes against the point, but could
-# be very useful in some scenarios and testing
-attribute :environment, :kind_of => String, :default => node.chef_environment
-
-# node cluster / flock attribute, this could differ one setup to another, hence
-# optional to configure used node cluster attribute
-attribute :flock, :kind_of => String, :default => node[node['javadeploy']['flock_attribute']]
