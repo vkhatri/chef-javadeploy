@@ -74,12 +74,12 @@ def databag_revision_find(repository, type, level)
 end
 
 def repository
-  if new_resource.action == :create
-    resource_action = :create
-    setup_resource = true
-  else
+  if new_resource.action == :delete
     resource_action = :delete
     setup_resource = false
+  else
+    resource_action = :create
+    setup_resource = true
   end
 
   # repo name
