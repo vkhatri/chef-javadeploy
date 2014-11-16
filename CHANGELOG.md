@@ -3,7 +3,14 @@ javadeploy CHANGELOG
 
 This file is used to list changes made in each version of the javadeploy cookbook.
 
-0.1.0
+0.2.2
+-----
+
+- Virender Khatri - attribute `node['javadeploy']['databag_revision'] disabled by default
+
+- Virender Khatri - updated README with more info
+
+0.2.0
 -----
 
 - Virender Khatri - bug fixes and tested

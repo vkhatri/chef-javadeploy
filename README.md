@@ -520,6 +520,65 @@ Information not yet added.
 * `default[:javadeploy][:limits][:nproc]` (default: `unlimited`): service user process limit
 
 
+## Usage
+
+Add `javadeploy` cookbook to your cookbook metadata.rb and add `javadeploy::default` to your cookbook recipe before using LWRP. It is required to create base directory/file resources.
+
+
+#### Setup SSH Key Wrapper
+
+**Create SSH Wrapper File**
+
+Create a ssh key wrapper file, e.g. `/opt/javadeploy/gitkey.key.wrapper` with below content:
+
+
+	#!/bin/bash
+
+	/usr/bin/env ssh -o "StrictHostKeyChecking=no" -i "<%= /opt/javadeploy/gitkey.key -%>" $@
+
+
+**Create SSH Private Key File**
+
+e.g. /opt/javadeploy/gitkey.key
+
+Add SSH Private Key Content to file `/opt/javadeploy/gitkey.key`.
+
+
+#### Create Java Repository Resource
+
+Add below resource to your cookbook recipe:
+
+    javadeploy 'GIT_REPOSITORY' do
+	  ssh_key_wrapper_file '/opt/javadeploy/gitkey.key.wrapper'
+	  repository_url 'git@github.com:GITHUB_USER/GIT_REPOSITORY.git'
+	  options ["-Dcom.sun.management.jmxremote.ssl=false",
+    	"-Dlog4j.configuration=log4j.xml",
+    	"-Dlog4j.debug=info",
+    	"-Dfile.encoding=UTF-8",
+    	"-Xdebug"
+	  ]
+	  class_name 'java.className'
+	  class_path ["config/#{node.environment}",
+		'package/lib/*',
+		'package/resources',
+		'package/*'
+	  ]
+	  console_log false
+	  current_revision 'CURRENT_REVISION'
+	  other_revisions ['OLD_REVISION_1', 'OLD_REVISION_2']
+	end
+
+
+#### Delete Java Repository Resource
+
+Update resource `action` to `:delete` to remove a repository from the node:
+
+    javadeploy 'GIT_REPOSITORY' do
+      option value
+      action :delete
+    end
+
+
 ## Contributing
 
 1. Fork the repository on Github
