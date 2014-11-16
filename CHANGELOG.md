@@ -3,6 +3,11 @@ javadeploy CHANGELOG
 
 This file is used to list changes made in each version of the javadeploy cookbook.
 
+0.2.6
+-----
+
+- Virender Khatri - fixed LWRP action issue #1
+
 0.2.5
 -----
 
