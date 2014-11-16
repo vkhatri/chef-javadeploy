@@ -20,3 +20,4 @@
 include_recipe 'javadeploy::java'
 include_recipe 'javadeploy::user'
 include_recipe 'javadeploy::core'
+include_recipe 'javadeploy::repositories'
