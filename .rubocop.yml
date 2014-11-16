@@ -19,8 +19,8 @@ CyclomaticComplexity:
   Enabled: false
 GuardClause:
   Enabled: false
-Metrics/PerceivedComplexity:
-  Max: 30
+PerceivedComplexity:
+  Enabled: false
 AbcSize:
   Enabled: false
 MethodLength:
