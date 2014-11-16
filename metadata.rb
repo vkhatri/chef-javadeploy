@@ -2,9 +2,9 @@ name 'javadeploy'
 maintainer 'Virender Khatri'
 maintainer_email 'vir.khatri@gmail.com'
 license 'Apache 2.0'
-description 'Deploy/Manage Java Projects/Git Repositories Service with Version Control'
+description 'Deploy/Manage Java Git Repositories Projects as a Service with Version Control'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version '0.2.2'
+version '0.2.5'
 
 depends 'ulimit'
 depends 'java'

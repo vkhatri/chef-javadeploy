@@ -3,6 +3,15 @@ javadeploy CHANGELOG
 
 This file is used to list changes made in each version of the javadeploy cookbook.
 
+0.2.5
+-----
+
+- Virender Khatri - fixed default LWRP resource action
+
+- Virender Khatri - added recipe to setup repository from node attribute using data bag
+
+- Virender Khatri - added information to README
+
 0.2.2
 -----
 
