@@ -19,7 +19,6 @@
 
 unless node['javadeploy']['repositories'].empty?
   databag = data_bag_item(node['javadeploy']['databag'], 'repositories')['repositories']
-  puts "\n\n #{databag.inspect} \n\n"
 
   node['javadeploy']['repositories'].each do |repo_name, repo_options|
     fail "unable to find repository '#{repo_name}' details in data bag '#{node['javadeploy']['databag']}' item 'repositories'" unless databag.key?(repo_name)
