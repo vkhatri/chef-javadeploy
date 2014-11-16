@@ -3,9 +3,9 @@ javadeploy Cookbook
 
 [![Build Status](https://travis-ci.org/vkhatri/chef-javadeploy.svg?branch=master)](https://travis-ci.org/vkhatri/chef-javadeploy)
 
-This is a [Chef] cookbook to Deploy/Manage `Java` Projects Git Repositories.
+This is a [Chef] cookbook to Deploy/Manage [Java] Projects Git Repositories.
 
-This cookbook deploys a multi revisions service for `Java` `Git` Repositories
+This cookbook deploys a multi revisions service for [Java] `Git` Repositories
 with ease of revision control management.
 
 More features and attributes will be added over time, **feel free to contribute**
@@ -28,15 +28,15 @@ Java is setup and managed by `java` cookbook.
 
 * Add git ssh wrapper capability to the cookbook
 
-	    Currently cookbook does not manage git ssh wrapper and LWRP resource 
-	    attribute :ssh_key_wrapper_file must point to a wrapper file managed 
+	    Currently cookbook does not manage git ssh wrapper and LWRP resource
+	    attribute :ssh_key_wrapper_file must point to a wrapper file managed
 	    separately.
 
 * Add LWRP resource setup using node attribute `node['javadeploy']['repositories']` from data bag
 
 * Add more init style
-	
-	    
+
+
 ## Cookbook Dependencies
 
 * `ulimit` cookbook
@@ -146,16 +146,16 @@ Parameters:
 
 For a repository, revision is categorized into two types:
 
-* `current` - current revision or default revision on which java service will be running, it can be configured using LWRP attribute `current_revision` or defining attribute `current_revision` in local json file on node / data bag hierarchy
+* `current` - current revision or default revision on which java service will be running, it can be configured using LWRP attribute `current_revision` or defining attribute `current_revision` for a repository in local json file on node / data bag hierarchy
 
-* `other` - other revision(s) or list of revisions which are meant to preserve on a node for roll back or other purposes, it can be configured using LWRP attribute `other_revisions` or defining attribute `other_revisions` in local json file on node / data bag hierarchy
+* `other` - other revision(s) or list of revisions which are meant to preserve on a node for roll back or other purposes, it can be configured using LWRP attribute `other_revisions` or defining attribute `other_revisions` for a repository in local json file on node / data bag hierarchy
 
 
 ## Cookbook LWRP Revision Attributes & Precedence
 
 Repository revisions can be managed in different ways using this cookbook.
 
-#### LWRP Resource attributes precedence
+#### LWRP Revision Attributes Precedence
 
 * `:file_revision` - from a local json file
 * `:databag_revision` - from data bag hierarchy of `node fqdn, node cluster, node environment or default revision`
@@ -165,7 +165,7 @@ Idea is to minimise the effort to change and manage
 revision for multiple repositories in a simplest way possible.
 
 
-#### LWRP Resource attributes
+#### LWRP Revision Attributes
 
 **:file_revision**
 
@@ -252,10 +252,10 @@ Local JSON file location is common for all repositories and configurable by attr
 
 Note:
 
-	If attribute `node['javadeploy']['file_revision']` is not configured, 
+	If attribute `node['javadeploy']['file_revision']` is not configured,
 	LWRP will not lookup local file for revisions value.
 
-	If a repository or repository revision attributes are not present in the file, 
+	If a repository or repository revision attributes are not present in the file,
 	LWRP will try to look up revisions in next configured precedence.
 
 Managing repository revisions from a local json file could be a problem especially running in cloud infrastructure where node replacement or rebuild requires its preservation.
@@ -287,17 +287,42 @@ There are total four data bag items used by LWRP to maintain repository revision
 * revision_environment
 * revision_default
 
-		Hierarchy does not mean that LWRP performs any kind of attributes merge 
+		Hierarchy does not mean that LWRP performs any kind of attributes merge
 		on different data bag items.
-		It means if a value is found in a data bag item for repository 
-		'current_revision' or 'other_revisions', next data bag items will 
+		It means if a value is found in a data bag item for repository
+		'current_revision' or 'other_revisions', next data bag items will
 		not be checked and will simply ignored.
 
-		e.g. a repository revision is configured in data bag item `revision_fqdn` 
+		e.g. a repository revision is configured in data bag item `revision_fqdn`
 		which means all other data bag items will be ignored.
-		If no revision is found in `revision_fqdn` data bag item, LWRP will check 
+		If no revision is found in `revision_fqdn` data bag item, LWRP will check
 		`revision_flock` and so on in the hierarchy.
 
+**Create Data Bag & Items**
+
+Create Data bag:
+
+```sh
+knife data bag create DATA_BAG_NAME
+```
+
+Create below Data Bag Items and copy content from sample mentioned in next section:
+
+```sh
+knife data bag create DATA_BAG_NAME revision_fqdn
+knife data bag create DATA_BAG_NAME revision_flock
+knife data bag create DATA_BAG_NAME revision_environment
+knife data bag create DATA_BAG_NAME revision_default
+```
+
+Or Create below Data Bag Items json file from next section samples and upload to Data Bag:
+
+```sh
+knife data bag from file DATA_BAG_NAME revision_fqdn.json
+knife data bag from file DATA_BAG_NAME revision_flock.json
+knife data bag from file DATA_BAG_NAME revision_environment.json
+knife data bag from file DATA_BAG_NAME revision_default.json
+```
 
 **Data Bag Items Sample**
 
@@ -526,4 +551,5 @@ limitations under the License.
 </pre>
 
 [Chef]: https://www.getchef.com/chef/
+[Java]:https://java.com/
 [Contributors]: https://github.com/vkhatri/chef-javadeploy/graphs/contributors

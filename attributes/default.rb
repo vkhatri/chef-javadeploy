@@ -5,7 +5,7 @@ default['javadeploy']['install_java'] = true
 default['javadeploy']['databag'] = 'javadeploy'
 
 # set repository revision from a data bag
-default['javadeploy']['databag_revision'] = true
+default['javadeploy']['databag_revision'] = false
 
 default['javadeploy']['flock_attribute'] = 'flock'
 
