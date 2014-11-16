@@ -74,7 +74,7 @@ def databag_revision_find(repository, type, level)
 end
 
 def repository
-  if new_resource.action == :delete
+  if (new_resource.action.is_a?(Array) && new_resource.action.include?(:delete)) || (new_resource.action.is_a?(Symbol) && new_resource.action == :delete)
     resource_action = :delete
     setup_resource = false
   else
