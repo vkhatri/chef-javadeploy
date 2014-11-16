@@ -434,6 +434,129 @@ knife data bag from file DATA_BAG_NAME revision_default.json
 	}
 
 
+## Store Repository from Data Bag Source
+
+Instead of creating LWRP resource for each repository, a repository can also be created using node attribute `node['javadeploy']['repositories']`. So that for any repository add/delete/update LWRP resoruce not need to be created.
+
+**Add Repositories to Data Bag Collection**
+
+To maintain repositories information, a data bag item needs to created with name `repositories`.
+
+This data bag item will have all the repositories and their details.
+
+Below json file is a sample of `repositories` data bag item.
+
+    {
+      "id": "repositories",
+        "description": "Repositories Details",
+        "repositories": {
+          "REPOSITORY_NAME1": {
+            "repository_url": "git@github.com:GITHUB_USER/REPOSITORY_NAME1.git",
+            "repository_checkout": null,
+            "user": null,
+            "group": null,
+            "dir_mode": null,
+            "service_name": null,
+            "manage_service": null,
+            "service_action": null,
+            "service_supports": null,
+            "init_style": null,
+            "ssh_key_wrapper_file": "/opt/javadeploy/gitkey.wrapper",
+            "console_log": false,
+            "verify_file": null,
+            "class_path": [],
+            "ext_class_path": [],
+            "class_name": "java.className",
+            "options": [],
+            "jar": null,
+            "args": [],
+            "auto_java_xmx": true,
+            "environment": null,
+            "flock": null,
+            "other_revisions": [],
+            "current_revision": null,
+            "databag_revision": false,
+            "file_revision": null,
+            "notify_restart": "",
+            "revision_service_notify_action": null,
+            "revision_service_notify_timing": null,
+            "cookbook": null,
+            "purge": true
+          },
+          "REPOSITORY_NAME2": {
+            "repository_url": "git@github.com:GITHUB_USER/REPOSITORY_NAME2.git",
+            "repository_checkout": null,
+            "user": null,
+            "group": null,
+            "dir_mode": null,
+            "service_name": null,
+            "manage_service": null,
+            "service_action": null,
+            "service_supports": null,
+            "init_style": null,
+            "ssh_key_wrapper_file": "/opt/javadeploy/gitkey.wrapper",
+            "console_log": false,
+            "verify_file": null,
+            "class_path": [],
+            "ext_class_path": [],
+            "class_name": "java.className",
+            "options": [],
+            "jar": null,
+            "args": [],
+            "auto_java_xmx": true,
+            "environment": null,
+            "flock": null,
+            "other_revisions": [],
+            "current_revision": null,
+            "databag_revision": false,
+            "file_revision": null,
+            "notify_restart": "",
+            "revision_service_notify_action": null,
+            "revision_service_notify_timing": null,
+            "cookbook": null,
+            "purge": true
+          }
+        }
+    }
+
+Note: All the repository resource are not required, add them as per requirement.
+
+
+**Create Repository using Node Attribute**
+
+	"default_attributes": {
+	  "javadeploy": {
+	    "repositories": {
+	      "repository_name1": {},
+	      "repository_name2": {}
+	    }
+	  }
+	}
+
+**Delete Repository using Node Attribute**
+
+	"default_attributes": {
+	  "javadeploy": {
+	    "repositories": {
+	      "repository_name1": {
+	        "action": "delete"
+	      },
+	      "repository_name2": {
+	        "action": "delete"
+	      }
+	    }
+	  }
+	}
+
+
+**Cookbook Recipe `javadeploy::repositories`**
+
+Recipe `javadeploy::repositories` read node attribute `node['javadeploy']['repositories']` and create/delete repository on the node.
+
+
+This makes adding or removing repository for a node more simpler by simply adding a repository with resource `:action` to node attribute - `node['javadeploy']['repositories']`.
+
+
 ## Cookbook Revision Precedence Scenarios
 
 Information not yet added.
