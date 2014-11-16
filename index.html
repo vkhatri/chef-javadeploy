@@ -507,6 +507,129 @@ knife data bag from file DATA_BAG_NAME revision_default.json</pre></div>
 </code></pre>
 
 <h2>
+<a id="store-repository-from-data-bag-source" class="anchor" href="#store-repository-from-data-bag-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Store Repository from Data Bag Source</h2>
+
+<p>Instead of creating LWRP resource for each repository, a repository can also be created using node attribute <code>node['javadeploy']['repositories']</code>. So that for any repository add/delete/update LWRP resoruce not need to be created.</p>
+
+<p><strong>Add Repositories to Data Bag Collection</strong></p>
+
+<p>To maintain repositories information, a data bag item needs to created with name <code>repositories</code>.</p>
+
+<p>This data bag item will have all the repositories and their details.</p>
+
+<p>Below json file is a sample of <code>repositories</code> data bag item.</p>
+
+<pre><code>{
+  "id": "repositories",
+    "description": "Repositories Details",
+    "repositories": {
+      "REPOSITORY_NAME1": {
+        "repository_url": "git@github.com:GITHUB_USER/REPOSITORY_NAME1.git",
+        "repository_checkout": null,
+        "user": null,
+        "group": null,
+        "dir_mode": null,
+        "service_name": null,
+        "manage_service": null,
+        "service_action": null,
+        "service_supports": null,
+        "init_style": null,
+        "ssh_key_wrapper_file": "/opt/javadeploy/gitkey.wrapper",
+        "console_log": false,
+        "verify_file": null,
+        "class_path": [],
+        "ext_class_path": [],
+        "class_name": "java.className",
+        "options": [],
+        "jar": null,
+        "args": [],
+        "auto_java_xmx": true,
+        "environment": null,
+        "flock": null,
+        "other_revisions": [],
+        "current_revision": null,
+        "databag_revision": false,
+        "file_revision": null,
+        "notify_restart": "",
+        "revision_service_notify_action": null,
+        "revision_service_notify_timing": null,
+        "cookbook": null,
+        "purge": true
+      },
+      "REPOSITORY_NAME2": {
+        "repository_url": "git@github.com:GITHUB_USER/REPOSITORY_NAME2.git",
+        "repository_checkout": null,
+        "user": null,
+        "group": null,
+        "dir_mode": null,
+        "service_name": null,
+        "manage_service": null,
+        "service_action": null,
+        "service_supports": null,
+        "init_style": null,
+        "ssh_key_wrapper_file": "/opt/javadeploy/gitkey.wrapper",
+        "console_log": false,
+        "verify_file": null,
+        "class_path": [],
+        "ext_class_path": [],
+        "class_name": "java.className",
+        "options": [],
+        "jar": null,
+        "args": [],
+        "auto_java_xmx": true,
+        "environment": null,
+        "flock": null,
+        "other_revisions": [],
+        "current_revision": null,
+        "databag_revision": false,
+        "file_revision": null,
+        "notify_restart": "",
+        "revision_service_notify_action": null,
+        "revision_service_notify_timing": null,
+        "cookbook": null,
+        "purge": true
+      }
+    }
+}
+</code></pre>
+
+<p>Note: All the repository resource are not required, add them as per requirement.</p>
+
+<p><strong>Create Repository using Node Attribute</strong></p>
+
+<pre><code>"default_attributes": {
+  "javadeploy": {
+    "repositories": {
+      "repository_name1": {},
+      "repository_name2": {}
+    }
+  }
+}
+</code></pre>
+
+<p><strong>Delete Repository using Node Attribute</strong></p>
+
+<pre><code>"default_attributes": {
+  "javadeploy": {
+    "repositories": {
+      "repository_name1": {
+        "action": "delete"
+      },
+      "repository_name2": {
+        "action": "delete"
+      }
+    }
+  }
+}
+</code></pre>
+
+<p><strong>Cookbook Recipe <code>javadeploy::repositories</code></strong></p>
+
+<p>Recipe <code>javadeploy::repositories</code> read node attribute <code>node['javadeploy']['repositories']</code> and create/delete repository on the node.</p>
+
+<p>This makes adding or removing repository for a node more simpler by simply adding a repository with resource <code>:action</code> to node attribute - <code>node['javadeploy']['repositories']</code>.</p>
+
+<h2>
 <a id="cookbook-revision-precedence-scenarios" class="anchor" href="#cookbook-revision-precedence-scenarios" aria-hidden="true"><span class="octicon octicon-link"></span></a>Cookbook Revision Precedence Scenarios</h2>
 
 <p>Information not yet added.</p>
