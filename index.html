@@ -32,9 +32,9 @@
 
 <p><a href="https://travis-ci.org/vkhatri/chef-javadeploy"><img src="https://travis-ci.org/vkhatri/chef-javadeploy.svg?branch=master" alt="Build Status"></a></p>
 
-<p>This is a <a href="https://www.getchef.com/chef/">Chef</a> cookbook to Deploy/Manage <code>Java</code> Projects Git Repositories.</p>
+<p>This is a <a href="https://www.getchef.com/chef/">Chef</a> cookbook to Deploy/Manage <a href="https://java.com/">Java</a> Projects Git Repositories.</p>
 
-<p>This cookbook deploys a multi revisions service for <code>Java</code> <code>Git</code> Repositories
+<p>This cookbook deploys a multi revisions service for <a href="https://java.com/">Java</a> <code>Git</code> Repositories
 with ease of revision control management.</p>
 
 <p>More features and attributes will be added over time, <strong>feel free to contribute</strong>
@@ -59,8 +59,8 @@ what you find missing!</p>
 <li>
 <p>Add git ssh wrapper capability to the cookbook</p>
 
-<pre><code>Currently cookbook does not manage git ssh wrapper and LWRP resource 
-attribute :ssh_key_wrapper_file must point to a wrapper file managed 
+<pre><code>Currently cookbook does not manage git ssh wrapper and LWRP resource
+attribute :ssh_key_wrapper_file must point to a wrapper file managed
 separately.
 </code></pre>
 </li>
@@ -208,8 +208,8 @@ end
 <p>For a repository, revision is categorized into two types:</p>
 
 <ul>
-<li><p><code>current</code> - current revision or default revision on which java service will be running, it can be configured using LWRP attribute <code>current_revision</code> or defining attribute <code>current_revision</code> in local json file on node / data bag hierarchy</p></li>
-<li><p><code>other</code> - other revision(s) or list of revisions which are meant to preserve on a node for roll back or other purposes, it can be configured using LWRP attribute <code>other_revisions</code> or defining attribute <code>other_revisions</code> in local json file on node / data bag hierarchy</p></li>
+<li><p><code>current</code> - current revision or default revision on which java service will be running, it can be configured using LWRP attribute <code>current_revision</code> or defining attribute <code>current_revision</code> for a repository in local json file on node / data bag hierarchy</p></li>
+<li><p><code>other</code> - other revision(s) or list of revisions which are meant to preserve on a node for roll back or other purposes, it can be configured using LWRP attribute <code>other_revisions</code> or defining attribute <code>other_revisions</code> for a repository in local json file on node / data bag hierarchy</p></li>
 </ul>
 
 <h2>
@@ -218,7 +218,7 @@ end
 <p>Repository revisions can be managed in different ways using this cookbook.</p>
 
 <h4>
-<a id="lwrp-resource-attributes-precedence" class="anchor" href="#lwrp-resource-attributes-precedence" aria-hidden="true"><span class="octicon octicon-link"></span></a>LWRP Resource attributes precedence</h4>
+<a id="lwrp-revision-attributes-precedence" class="anchor" href="#lwrp-revision-attributes-precedence" aria-hidden="true"><span class="octicon octicon-link"></span></a>LWRP Revision Attributes Precedence</h4>
 
 <ul>
 <li>
@@ -235,7 +235,7 @@ end
 revision for multiple repositories in a simplest way possible.</p>
 
 <h4>
-<a id="lwrp-resource-attributes" class="anchor" href="#lwrp-resource-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>LWRP Resource attributes</h4>
+<a id="lwrp-revision-attributes" class="anchor" href="#lwrp-revision-attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>LWRP Revision Attributes</h4>
 
 <p><strong>:file_revision</strong></p>
 
@@ -323,10 +323,10 @@ resource attribute <code>:file_revision</code>.</p>
 
 <p>Note:</p>
 
-<pre><code>If attribute `node['javadeploy']['file_revision']` is not configured, 
+<pre><code>If attribute `node['javadeploy']['file_revision']` is not configured,
 LWRP will not lookup local file for revisions value.
 
-If a repository or repository revision attributes are not present in the file, 
+If a repository or repository revision attributes are not present in the file,
 LWRP will try to look up revisions in next configured precedence.
 </code></pre>
 
@@ -360,19 +360,39 @@ LWRP will try to look up revisions in next configured precedence.
 <li>
 <p>revision_default</p>
 
-<pre><code>Hierarchy does not mean that LWRP performs any kind of attributes merge 
+<pre><code>Hierarchy does not mean that LWRP performs any kind of attributes merge
 on different data bag items.
-It means if a value is found in a data bag item for repository 
-'current_revision' or 'other_revisions', next data bag items will 
+It means if a value is found in a data bag item for repository
+'current_revision' or 'other_revisions', next data bag items will
 not be checked and will simply ignored.
 
-e.g. a repository revision is configured in data bag item `revision_fqdn` 
+e.g. a repository revision is configured in data bag item `revision_fqdn`
 which means all other data bag items will be ignored.
-If no revision is found in `revision_fqdn` data bag item, LWRP will check 
+If no revision is found in `revision_fqdn` data bag item, LWRP will check
 `revision_flock` and so on in the hierarchy.
 </code></pre>
 </li>
 </ul>
+
+<p><strong>Create Data Bag &amp; Items</strong></p>
+
+<p>Create Data bag:</p>
+
+<div class="highlight highlight-sh"><pre>knife data bag create DATA_BAG_NAME</pre></div>
+
+<p>Create below Data Bag Items and copy content from sample mentioned in next section:</p>
+
+<div class="highlight highlight-sh"><pre>knife data bag create DATA_BAG_NAME revision_fqdn
+knife data bag create DATA_BAG_NAME revision_flock
+knife data bag create DATA_BAG_NAME revision_environment
+knife data bag create DATA_BAG_NAME revision_default</pre></div>
+
+<p>Or Create below Data Bag Items json file from next section samples and upload to Data Bag:</p>
+
+<div class="highlight highlight-sh"><pre>knife data bag from file DATA_BAG_NAME revision_fqdn.json
+knife data bag from file DATA_BAG_NAME revision_flock.json
+knife data bag from file DATA_BAG_NAME revision_environment.json
+knife data bag from file DATA_BAG_NAME revision_default.json</pre></div>
 
 <p><strong>Data Bag Items Sample</strong></p>
 
@@ -544,6 +564,66 @@ If no revision is found in `revision_fqdn` data bag item, LWRP will check
 <li><p><code>default[:javadeploy][:limits][:nofile]</code> (default: <code>48000</code>): service user file limit</p></li>
 <li><p><code>default[:javadeploy][:limits][:nproc]</code> (default: <code>unlimited</code>): service user process limit</p></li>
 </ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Add <code>javadeploy</code> cookbook to your cookbook metadata.rb and add <code>javadeploy::default</code> to your cookbook recipe before using LWRP. It is required to create base directory/file resources.</p>
+
+<h4>
+<a id="setup-ssh-key-wrapper" class="anchor" href="#setup-ssh-key-wrapper" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup SSH Key Wrapper</h4>
+
+<p><strong>Create SSH Wrapper File</strong></p>
+
+<p>Create a ssh key wrapper file, e.g. <code>/opt/javadeploy/gitkey.key.wrapper</code> with below content:</p>
+
+<pre><code>#!/bin/bash
+
+/usr/bin/env ssh -o "StrictHostKeyChecking=no" -i "&lt;%= /opt/javadeploy/gitkey.key -%&gt;" $@
+</code></pre>
+
+<p><strong>Create SSH Private Key File</strong></p>
+
+<p>e.g. /opt/javadeploy/gitkey.key</p>
+
+<p>Add SSH Private Key Content to file <code>/opt/javadeploy/gitkey.key</code>.</p>
+
+<h4>
+<a id="create-java-repository-resource" class="anchor" href="#create-java-repository-resource" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create Java Repository Resource</h4>
+
+<p>Add below resource to your cookbook recipe:</p>
+
+<pre><code>javadeploy 'GIT_REPOSITORY' do
+  ssh_key_wrapper_file '/opt/javadeploy/gitkey.key.wrapper'
+  repository_url 'git@github.com:GITHUB_USER/GIT_REPOSITORY.git'
+  options ["-Dcom.sun.management.jmxremote.ssl=false",
+    "-Dlog4j.configuration=log4j.xml",
+    "-Dlog4j.debug=info",
+    "-Dfile.encoding=UTF-8",
+    "-Xdebug"
+  ]
+  class_name 'java.className'
+  class_path ["config/#{node.environment}",
+    'package/lib/*',
+    'package/resources',
+    'package/*'
+  ]
+  console_log false
+  current_revision 'CURRENT_REVISION'
+  other_revisions ['OLD_REVISION_1', 'OLD_REVISION_2']
+end
+</code></pre>
+
+<h4>
+<a id="delete-java-repository-resource" class="anchor" href="#delete-java-repository-resource" aria-hidden="true"><span class="octicon octicon-link"></span></a>Delete Java Repository Resource</h4>
+
+<p>Update resource <code>action</code> to <code>:delete</code> to remove a repository from the node:</p>
+
+<pre><code>javadeploy 'GIT_REPOSITORY' do
+  option value
+  action :delete
+end
+</code></pre>
 
 <h2>
 <a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
