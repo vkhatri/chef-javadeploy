@@ -83,7 +83,7 @@ service_start_pre_check() {
     process_pid=$(cat $PID_FILE)
     ps -p $process_pid > /dev/null
     if [ $? == 0 ]; then
-      echo -n "$PROGRAM is already running ($PID_FILE)"
+      echo -n "$PROGRAM is already running ($process_pid)"
       echo
       exit 0
     else
