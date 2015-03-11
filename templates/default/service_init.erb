@@ -24,7 +24,7 @@ SERVICE_GROUP=<%= @group %>
 PROGRAM=<%= @service_name %>
 PID_FILE=<%= @pid_file %>
 
-LOG_FILE="1>> <%= @log_file -%> 2>&1"
+LOG_FILE="1> <%= @log_file -%> 2>&1"
 
 # stale symlinks
 SERVICE_HOME=<%= @home %>
