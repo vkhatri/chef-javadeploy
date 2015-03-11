@@ -121,8 +121,10 @@ def repository
   if new_resource.file_revision && ::File.exist?(new_resource.file_revision)
     file_revision = JSON.parse(::File.open(new_resource.file_revision).read)
     fail "incorrect attributes, missing root element 'repositories' in revision file '#{new_resource.file_revision}'" unless file_revision.key?('repositories')
-    repository_other_revisions = file_revision['repositories'][repo_name]['other_revisions']
-    repository_current_revision = file_revision['repositories'][repo_name]['current_revision']
+    if file_revision['repositories'].key?(repo_name)
+      repository_other_revisions = file_revision['repositories'][repo_name]['other_revisions']
+      repository_current_revision = file_revision['repositories'][repo_name]['current_revision']
+    end
   elsif new_resource.databag_revision
     # data bag revisions
     repository_other_revisions = other_revisions(repo_name)
@@ -227,12 +229,14 @@ def repository
     action resource_action
   end
 
+  Chef::Log.info("setting default revision to #{repository_current_revision} for #{repo_name}")
+
   link default_revision_dir do
     to current_revision_dir
     owner new_resource.user
     group new_resource.group
     notifies new_resource.revision_service_notify_action, "service[#{service_name}]", new_resource.revision_service_notify_timing if new_resource.notify_restart
-    only_if { setup_resource && resource_action == :create }
+    only_if { !::File.exist?(default_revision_dir) || (setup_resource && new_resource.migrate && resource_action == :create) }
   end
 
   # purge stale revisions

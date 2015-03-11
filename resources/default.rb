@@ -24,6 +24,7 @@ default_action :create
 attribute :repository_url,      :kind_of => String, :required => true, :default => nil
 attribute :repository_checkout,      :kind_of => String, :default => node['javadeploy']['repository_checkout']
 
+attribute :migrate, :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['migrate']
 attribute :user,    :kind_of => String, :default => node['javadeploy']['user']
 attribute :group,   :kind_of => String, :default => node['javadeploy']['group']
 attribute :dir_mode,        :kind_of => String, :default => node['javadeploy']['dir_mode']
@@ -58,7 +59,7 @@ attribute :flock, :kind_of => String, :default => node[node['javadeploy']['flock
 attribute :other_revisions,   :kind_of => Array, :default => []
 attribute :current_revision,  :kind_of => String, :default => node['javadeploy']['current_revision']
 attribute :databag_revision,  :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
-attribute :file_revision,     :kind_of => String, :default => node['javadeploy']['file_revision']
+attribute :file_revision,     :kind_of => [FalseClass, String], :default => node['javadeploy']['file_revision']
 
 attribute :notify_restart,  :kind_of => String, :default => node['javadeploy']['notify_restart']
 attribute :revision_service_notify_action,      :kind_of => String, :default => node['javadeploy']['revision_service_notify_action']

@@ -1,4 +1,7 @@
 
+# whether to switch repository to new revision
+default['javadeploy']['migrate'] = true
+
 default['javadeploy']['install_java'] = true
 
 # repositories collection definition data bag
