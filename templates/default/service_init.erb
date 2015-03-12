@@ -87,9 +87,9 @@ service_start_pre_check() {
       echo
       exit 0
     else
-      echo -n "$PROGRAM is dead and pid file exists($PID_FILE)"
+      rm -fr $PID_FILE
+      echo -n "$PROGRAM was dead and pid file removed ($PID_FILE)"
       echo
-      exit 1
     fi
   fi
 }
