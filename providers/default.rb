@@ -125,17 +125,24 @@ def repository
       repository_other_revisions = file_revision['repositories'][repo_name]['other_revisions']
       repository_current_revision = file_revision['repositories'][repo_name]['current_revision']
     end
-  elsif new_resource.databag_revision
+  end
+
+  # data bag revisions, unless found in file revisions
+  if new_resource.databag_revision
     # data bag revisions
-    repository_other_revisions = other_revisions(repo_name)
-    repository_current_revision = current_revision(repo_name)
+    repository_other_revisions = other_revisions(repo_name) unless repository_other_revisions
+    repository_current_revision = current_revision(repo_name) unless repository_current_revision
   end
 
   # unless file_revision or databag_revision is not set or unable to
-  # determine values, defaults to resource
-  # resource revisions
+  # determine values, defaults to resource revisions
   repository_other_revisions = new_resource.other_revisions unless repository_other_revisions
   repository_current_revision = new_resource.current_revision unless repository_current_revision
+
+  # set other revisions to an empty array,
+  # better to set an empty array to
+  # verify class type
+  repository_other_revisions = [] unless  repository_other_revisions
 
   fail "unable to determine 'current_revision' for repository '#{repo_name}'" unless repository_current_revision
   fail "'current_revision' must be a String for repository '#{repo_name}'" unless repository_current_revision.is_a?(String)
@@ -165,13 +172,15 @@ def repository
   #  only_if { setup_resource }
   # end
 
-  fail "missing ssh wrapper file '#{ssh_key_wrapper_file}'" unless ::File.readable?(ssh_key_wrapper_file)
+  fail "missing ssh wrapper file '#{ssh_key_wrapper_file}'" unless ::File.readable?(ssh_key_wrapper_file) if setup_resource
+  fail 'missing resource attribute :repository_url' if !new_resource.repository_url && setup_resource
 
   # sync repo revisions
   repo_revisions.sort.uniq.each do |revision|
     git ::File.join(repo_revisions_dir, revision) do
       repository new_resource.repository_url
       revision revision
+      depth new_resource.repository_depth if new_resource.repository_depth
       ssh_wrapper ssh_key_wrapper_file
       user new_resource.user
       group new_resource.group
@@ -194,7 +203,7 @@ def repository
   end
 
   # add auto calculated java max heap parameter
-  new_resource.options.push node['javadeploy']['auto_java_xmx'] if  new_resource.auto_java_xmx
+  new_resource.options.push node['javadeploy']['auto_java_xmx'] if  new_resource.auto_java_xmx && setup_resource
 
   file log_file do
     owner new_resource.user
@@ -204,7 +213,7 @@ def repository
     action resource_action
   end
 
-  fail "missing :class_name for repository '#{repo_name}'" unless new_resource.class_name
+  fail "missing :class_name for repository '#{repo_name}'" unless new_resource.class_name if setup_resource
 
   template "/etc/init.d/#{repo_name}" do
     cookbook new_resource.cookbook
@@ -224,7 +233,7 @@ def repository
               :jar => new_resource.jar,
               :args => new_resource.args.join(' ')
              )
-    notifies :restart, "service[#{service_name}]", :delayed if new_resource.notify_restart
+    notifies :restart, "service[#{service_name}]", :delayed if new_resource.notify_restart && setup_resource
     only_if { new_resource.manage_service && new_resource.init_style == 'init' }
     action resource_action
   end
@@ -235,8 +244,9 @@ def repository
     to current_revision_dir
     owner new_resource.user
     group new_resource.group
-    notifies new_resource.revision_service_notify_action, "service[#{service_name}]", new_resource.revision_service_notify_timing if new_resource.notify_restart
+    notifies new_resource.revision_service_notify_action, "service[#{service_name}]", new_resource.revision_service_notify_timing if new_resource.notify_restart && setup_resource
     only_if { !::File.exist?(default_revision_dir) || (setup_resource && new_resource.migrate && resource_action == :create) }
+    action resource_action
   end
 
   # purge stale revisions

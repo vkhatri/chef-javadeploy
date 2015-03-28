@@ -21,8 +21,9 @@ actions :create, :delete
 
 default_action :create
 
-attribute :repository_url,      :kind_of => String, :required => true, :default => nil
-attribute :repository_checkout,      :kind_of => String, :default => node['javadeploy']['repository_checkout']
+attribute :repository_url,      :kind_of => String, :default => nil
+attribute :repository_depth,    :kind_of => Integer, :default => nil
+attribute :repository_checkout, :kind_of => String, :default => node['javadeploy']['repository_checkout']
 
 attribute :migrate, :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['migrate']
 attribute :user,    :kind_of => String, :default => node['javadeploy']['user']
@@ -56,7 +57,7 @@ attribute :environment, :kind_of => String, :default => node.environment
 # optional to configure used node cluster attribute
 attribute :flock, :kind_of => String, :default => node[node['javadeploy']['flock_attribute']]
 
-attribute :other_revisions,   :kind_of => Array, :default => []
+attribute :other_revisions,   :kind_of => Array, :default => nil
 attribute :current_revision,  :kind_of => String, :default => node['javadeploy']['current_revision']
 attribute :databag_revision,  :kind_of => [TrueClass, FalseClass], :default => node['javadeploy']['databag_revision']
 attribute :file_revision,     :kind_of => [FalseClass, String], :default => node['javadeploy']['file_revision']
